@@ -101,6 +101,11 @@ namespace org.herbal3d.transport {
             }
         }
 
+        public void ReplaceMessageProcessor(int pOpCode, ProcessMessage pProcessor) {
+            _MsgProcessors.Remove(pOpCode);
+            _MsgProcessors.Add(pOpCode, pProcessor);
+        }
+
         // This process shouldn't be receiving text message over the WebSocket
         public void Receive(string pMsg) {
             _context.Log.ErrorFormat("{0} Receive: received a text message: {1}", _logHeader, pMsg);
