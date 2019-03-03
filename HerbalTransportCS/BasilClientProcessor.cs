@@ -19,6 +19,8 @@ namespace org.herbal3d.transport {
     // Messages we might receive from Basil.
     // Only responses from our requests to the server.
     public class BasilClientProcessor : MsgProcessor {
+        public BasilClient BasilClientMsgProcessor;
+
         public BasilClientProcessor(BasilConnection pConnection, TransportContext pContext)
                                     : base(pConnection, pContext) {
             // Add processors for message ops.
@@ -36,6 +38,10 @@ namespace org.herbal3d.transport {
                 { (Int32)BasilMessage.BasilMessageOps.MakeConnectionResp, this.HandleResponse }
             };
             Connection.AddMessageProcessors(processors);
+        }
+
+        public void SetMsgProcessor(BasilClient pClient) {
+            BasilClientMsgProcessor = pClient;
         }
     }
 }

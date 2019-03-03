@@ -22,13 +22,7 @@ namespace org.herbal3d.transport {
     public class TransportConnection {
         private static readonly string _logHeader = "[TransportConnection]";
 
-        private IWebSocketConnection _connection = null;
-        private BasilConnection _basilConnection = null;
-        public readonly string Id;
-
-        private BlockingCollection<byte[]> _receiveQueue;
-        private BlockingCollection<byte[]> _sendQueue;
-
+        public event Action<TransportConnection> OnConnect;
         public event Action<TransportConnection> OnDisconnect;
         public enum ConnectionStates {
             INITIALIZING,
@@ -40,12 +34,19 @@ namespace org.herbal3d.transport {
         public ConnectionStates ConnectionState;
         public bool IsConnected {
             get {
-                return (ConnectionState == ConnectionStates.OPEN && _basilConnection != null);
+                return (ConnectionState == ConnectionStates.OPEN && BasilMsgHandler != null);
             }
         }
         public string ConnectionName = "UNKNOWN";
 
         private TransportContext _context;
+        private BlockingCollection<byte[]> _receiveQueue;
+        private BlockingCollection<byte[]> _sendQueue;
+
+        public BasilConnection BasilMsgHandler;
+
+        private IWebSocketConnection _connection = null;
+        public readonly string Id;
 
         public TransportConnection(IWebSocketConnection pConnection, TransportContext pContext) {
             _connection = pConnection;
@@ -56,7 +57,9 @@ namespace org.herbal3d.transport {
                             + ":"
                             + _connection.ConnectionInfo.ClientPort.ToString();
             ConnectionState = ConnectionStates.INITIALIZING;
+        }
 
+        public void Start() {
             _receiveQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
             _sendQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
 
@@ -64,9 +67,9 @@ namespace org.herbal3d.transport {
             // These tasks are here so the context will be this object instance rather than
             //     creating the tasks in the OnOpen event context.
             Task.Run(() => {
-                while (!_context.Cancellation.IsCancellationRequested) {
+                while (!_context.Cancellation.IsCancellationRequested && BasilMsgHandler != null) {
                     byte[] msg = _receiveQueue.Take();
-                    _basilConnection.Receive(msg);
+                    BasilMsgHandler.Receive(msg);
                 }
             }, _context.Cancellation);
             Task.Run(() => {
@@ -96,8 +99,7 @@ namespace org.herbal3d.transport {
         private void Connection_OnOpen() {
             if (ConnectionState == ConnectionStates.INITIALIZING) {
                 ConnectionState = ConnectionStates.OPEN;
-                // Get the processor for the messages
-                _basilConnection = new BasilConnection(this, _context);
+                TriggerConnect();
             }
             else {
                 ConnectionState = ConnectionStates.ERROR;
@@ -110,14 +112,14 @@ namespace org.herbal3d.transport {
         private void Connection_OnClose() {
             ConnectionState = ConnectionStates.CLOSED;
             TriggerDisconnect();
-            if (_basilConnection != null) {
-                _basilConnection.AbortConnection();
+            if (BasilMsgHandler != null) {
+                BasilMsgHandler.AbortConnection();
             }
         }
 
         private void Connection_OnMessage(string pMsg) {
             if (IsConnected) {
-                _basilConnection.Receive(pMsg);
+                BasilMsgHandler.Receive(pMsg);
             }
         }
 
@@ -130,6 +132,16 @@ namespace org.herbal3d.transport {
         private void Connection_OnError(Exception pExcept) {
             ConnectionState = ConnectionStates.ERROR;
             _context.Log.ErrorFormat("{0} OnError event on {1}: {2}", _logHeader, ConnectionName, pExcept);
+        }
+
+        // The WebSocket connection is connected. Tell the listeners.
+        private void TriggerConnect() {
+            Action<TransportConnection> actions = OnConnect;
+            if (actions != null) {
+                foreach (Action<TransportConnection> action in actions.GetInvocationList()) {
+                    action(this);
+                }
+            }
         }
 
         // The WebSocket connection is disconnected. Tell the listeners.

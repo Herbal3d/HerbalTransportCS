@@ -30,8 +30,6 @@ namespace org.herbal3d.transport {
 
     // Structure passed around providing readonly handles to global things
     public class TransportContext {
-        public NewClient HaveNewClient;
-        public SpaceServerForConnection NeedSpaceServer;
         public IParameters Params;
         public BLogger Log;
         public CancellationTokenSource CancellationSource;
@@ -42,15 +40,13 @@ namespace org.herbal3d.transport {
         private static readonly string _logHeader = "[HerbalTransport]";
 
         public TransportContext _context;
+
+        private readonly ISpaceServer _spaceServer;
         private List<TransportConnection> _transports = new List<TransportConnection>();
 
-        public HerbalTransport(NewClient pHaveNewClient,
-                    SpaceServerForConnection pGetSpaceServerInterface,
-                    IParameters pParams, BLogger pLog) {
-
+        public HerbalTransport(ISpaceServer pSpaceServer, IParameters pParams, BLogger pLog) {
+            _spaceServer = pSpaceServer;
             _context = new TransportContext() {
-                HaveNewClient = pHaveNewClient,
-                NeedSpaceServer = pGetSpaceServerInterface,
                 Params = pParams,
                 Log = pLog
             };
@@ -100,12 +96,21 @@ namespace org.herbal3d.transport {
                     pContext.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
                     lock (_transports) {
                         TransportConnection transportConnection = new TransportConnection(socket, pContext);
-                        transportConnection.OnDisconnect += client => {
+                        transportConnection.OnConnect += transport => {
+                            var basilConnection = new BasilConnection(transport, _context);
+                            var basilClient = new BasilClient(transportConnection.BasilMsgHandler, _context);
+                            basilConnection.SpaceServiceProcessor.SetMsgHandler(_spaceServer);
+                            basilConnection.BasilClientProcessor.SetMsgProcessor(basilClient);
+                            // This is done last as it tells the SpaceServer that a connection is complete
+                            _spaceServer.SetClientConnection(basilClient);
+                        };
+                        transportConnection.OnDisconnect += transport => {
                             lock (_transports) {
                                 pContext.Log.InfoFormat("{0} client disconnected", _logHeader);
-                                _transports.Remove(client);
+                                _transports.Remove(transport);
                             }
                         };
+                        transportConnection.Start();
                         _transports.Add(transportConnection);
                     };
 

@@ -16,23 +16,98 @@ using System.Threading.Tasks;
 
 using BasilType = org.herbal3d.basil.protocol.BasilType;
 using BasilMessage = org.herbal3d.basil.protocol.Message;
+using SpaceServer = org.herbal3d.basil.protocol.SpaceServer;
 
 namespace org.herbal3d.transport {
+    public interface ISpaceServer {
+        void SetClientConnection(BasilClient pClient);  // called with class to talk to client
+
+        SpaceServer.OpenSessionResp OpenSession(SpaceServer.OpenSessionReq pReq);
+        SpaceServer.CloseSessionResp CloseSession(SpaceServer.CloseSessionReq pReq);
+        SpaceServer.CameraViewResp CameraView(SpaceServer.CameraViewReq pReq);
+    }
+
     // Message Basil might send to us as a SpaceServer.
     public class SpaceServerProcessor : MsgProcessor {
         // private static readonly string _logHeader = "[SpaceServerProcessor]";
-        public readonly ISpaceServer Server;
+        public ISpaceServer SpaceServerMsgHandler;
 
         public SpaceServerProcessor(BasilConnection pConnection, TransportContext pContext)
                             : base(pConnection, pContext) {
             // Add processors for message ops
-            Server = _context.NeedSpaceServer(pConnection);
             BasilConnection.Processors processors = new BasilConnection.Processors {
-                { (Int32)BasilMessage.BasilMessageOps.OpenSessionReq, Server.OpenSession },
-                { (Int32)BasilMessage.BasilMessageOps.CloseSessionReq, Server.CloseSession },
-                { (Int32)BasilMessage.BasilMessageOps.CameraViewReq, Server.CameraView }
+                { (Int32)BasilMessage.BasilMessageOps.OpenSessionReq, this.WrapOpenSession },
+                { (Int32)BasilMessage.BasilMessageOps.CloseSessionReq, this.WrapCloseSession },
+                { (Int32)BasilMessage.BasilMessageOps.CameraViewReq, this.WrapCameraView }
             };
             Connection.AddMessageProcessors(processors);
+        }
+
+        public void SetMsgHandler(ISpaceServer pSpaceServer) {
+            SpaceServerMsgHandler = pSpaceServer;
+        }
+
+        private BasilMessage.BasilMessage WrapOpenSession(BasilMessage.BasilMessage pReq) {
+            BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage();
+
+            SpaceServer.OpenSessionReq ssReq = new SpaceServer.OpenSessionReq() {
+                Auth = pReq.Auth,
+            };
+            if (pReq.Properties != null && pReq.Properties.Count > 0) {
+                ssReq.Features.Add(pReq.Properties);
+            }
+            if (SpaceServerMsgHandler != null) {
+                SpaceServer.OpenSessionResp ssResp = SpaceServerMsgHandler.OpenSession(ssReq);
+                pResp.Exception = ssResp.Exception;
+                if (pReq.Properties != null && pReq.Properties.Count > 0) {
+                    ssReq.Features.Add(pReq.Properties);
+                }
+            }
+            else {
+                pResp.Exception = new BasilType.BasilException() {
+                    Reason = "Connection not initialized"
+                };
+            }
+            return pResp;
+        }
+
+        private BasilMessage.BasilMessage WrapCloseSession(BasilMessage.BasilMessage pReq) {
+            BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage();
+
+            SpaceServer.CloseSessionReq ssReq = new SpaceServer.CloseSessionReq() {
+                Auth = pReq.Auth
+            };
+            if (pReq.Properties != null && pReq.Properties.ContainsKey("Reason")) {
+                ssReq.Reason = pReq.Properties["Reason"];
+            }
+            if (SpaceServerMsgHandler != null) {
+                SpaceServer.CloseSessionResp ssResp = SpaceServerMsgHandler.CloseSession(ssReq);
+                pResp.Exception = ssResp.Exception;
+            }
+            else {
+                pResp.Exception = new BasilType.BasilException() {
+                    Reason = "Connection not initialized"
+                };
+            }
+            return pResp;
+        }
+
+        private BasilMessage.BasilMessage WrapCameraView(BasilMessage.BasilMessage pReq) {
+            BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage();
+
+            SpaceServer.CameraViewReq ssReq = new SpaceServer.CameraViewReq() {
+                Auth = pReq.Auth
+            };
+            if (SpaceServerMsgHandler != null) {
+                SpaceServer.CameraViewResp ssResp = SpaceServerMsgHandler.CameraView(ssReq);
+                pResp.Exception = ssResp.Exception;
+            }
+            else {
+                pResp.Exception = new BasilType.BasilException() {
+                    Reason = "Connection not initialized"
+                };
+            }
+            return pResp;
         }
     }
 }

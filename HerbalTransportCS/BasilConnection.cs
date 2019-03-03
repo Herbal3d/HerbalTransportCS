@@ -27,8 +27,6 @@ namespace org.herbal3d.transport {
 
         // Public connections to the outside world: transport connection and calls to server
         public TransportConnection Transport;
-        public readonly BasilClient Client;
-        public readonly ISpaceServer Server;
 
         // Mapping of BasilMessage op's to and from code to string operation name
         public Dictionary<Int32, String> BasilMessageNameByOp = new Dictionary<int, string>();
@@ -44,9 +42,9 @@ namespace org.herbal3d.transport {
         private Processors _MsgProcessors = new Processors();
 
         // Handles to the various message processors. Held on to for later disposal.
-        AliveCheckProcessor _aliveCheckProcessor;
-        SpaceServerProcessor _spaceServerProcessor;
-        BasilClientProcessor _basilClientProcessor;
+        public AliveCheckProcessor AliveCheckProcessor;
+        public SpaceServerProcessor SpaceServiceProcessor;
+        public BasilClientProcessor BasilClientProcessor;
 
         TransportContext _context; // Global constants
 
@@ -72,13 +70,9 @@ namespace org.herbal3d.transport {
             this.BuildBasilMessageOps();
 
             // Processors for received messages
-            _aliveCheckProcessor = new AliveCheckProcessor(this, _context);
-            _spaceServerProcessor = new SpaceServerProcessor(this, _context);
-            _basilClientProcessor = new BasilClientProcessor(this, _context);
-
-            // Routines for sending messages.
-            Server = _spaceServerProcessor.Server;
-            Client = new BasilClient(this, _context);
+            AliveCheckProcessor = new AliveCheckProcessor(this, _context);
+            SpaceServiceProcessor = new SpaceServerProcessor(this, _context);
+            BasilClientProcessor = new BasilClientProcessor(this, _context);
         }
 
         public void Dispose() {
@@ -87,9 +81,9 @@ namespace org.herbal3d.transport {
                 Transport = null;
                 _MsgProcessors.Clear();
                 OutstandingRPC.Clear();
-                _aliveCheckProcessor = null;
-                _spaceServerProcessor = null;
-                _basilClientProcessor = null;
+                AliveCheckProcessor = null;
+                SpaceServiceProcessor = null;
+                BasilClientProcessor = null;
             }
             throw new NotImplementedException();
         }
