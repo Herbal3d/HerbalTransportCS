@@ -37,7 +37,7 @@ namespace org.herbal3d.transport {
         }
 
         // Send a message and expect a RPC type response.
-        protected async Task<BasilMessage.BasilMessage> SendAndAwaitResponse(BasilMessage.BasilMessage pReq) {
+        public async Task<BasilMessage.BasilMessage> SendAndAwaitResponse(BasilMessage.BasilMessage pReq) {
             // Place structure in message that receiver will send back so we can match response.
             UInt32 thisSession = (UInt32)_randomNumbers.Next();
             pReq.Response = new BasilType.BResponseRequest() {

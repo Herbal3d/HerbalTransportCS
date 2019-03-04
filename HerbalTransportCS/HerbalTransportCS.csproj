@@ -61,7 +61,6 @@
     <Compile Include="HerbalTransport.cs" />
     <Compile Include="MsgProcessor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SpaceServer.cs" />
     <Compile Include="SpaceServerProcessor.cs" />
     <Compile Include="TransportConnection.cs" />
   </ItemGroup>

@@ -96,22 +96,23 @@ namespace org.herbal3d.transport {
                     pContext.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
                     lock (_transports) {
                         TransportConnection transportConnection = new TransportConnection(socket, pContext);
+                        var basilConnection = new BasilConnection(_spaceServer, transportConnection, _context);
+                        transportConnection.BasilMsgHandler = basilConnection;
+                        var basilClient = new BasilClient(basilConnection, _context);
                         transportConnection.OnConnect += transport => {
-                            var basilConnection = new BasilConnection(transport, _context);
-                            var basilClient = new BasilClient(transportConnection.BasilMsgHandler, _context);
-                            basilConnection.SpaceServiceProcessor.SetMsgHandler(_spaceServer);
-                            basilConnection.BasilClientProcessor.SetMsgProcessor(basilClient);
+                            pContext.Log.DebugFormat("{0} OnConnect event", _logHeader);
                             // This is done last as it tells the SpaceServer that a connection is complete
                             _spaceServer.SetClientConnection(basilClient);
                         };
                         transportConnection.OnDisconnect += transport => {
+                            pContext.Log.DebugFormat("{0} OnDisconnect event", _logHeader);
                             lock (_transports) {
                                 pContext.Log.InfoFormat("{0} client disconnected", _logHeader);
                                 _transports.Remove(transport);
                             }
                         };
-                        transportConnection.Start();
                         _transports.Add(transportConnection);
+                        transportConnection.Start();
                     };
 
                 });

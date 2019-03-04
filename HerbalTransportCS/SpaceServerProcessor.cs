@@ -32,8 +32,10 @@ namespace org.herbal3d.transport {
         // private static readonly string _logHeader = "[SpaceServerProcessor]";
         public ISpaceServer SpaceServerMsgHandler;
 
-        public SpaceServerProcessor(BasilConnection pConnection, TransportContext pContext)
+        public SpaceServerProcessor(BasilConnection pConnection, ISpaceServer pSpaceServer, TransportContext pContext)
                             : base(pConnection, pContext) {
+            SpaceServerMsgHandler = pSpaceServer;
+
             // Add processors for message ops
             BasilConnection.Processors processors = new BasilConnection.Processors {
                 { (Int32)BasilMessage.BasilMessageOps.OpenSessionReq, this.WrapOpenSession },
@@ -43,11 +45,8 @@ namespace org.herbal3d.transport {
             Connection.AddMessageProcessors(processors);
         }
 
-        public void SetMsgHandler(ISpaceServer pSpaceServer) {
-            SpaceServerMsgHandler = pSpaceServer;
-        }
-
         private BasilMessage.BasilMessage WrapOpenSession(BasilMessage.BasilMessage pReq) {
+            _context.Log.DebugFormat("[SpaceServerProcessor] WrapOpenSession");
             BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage();
 
             SpaceServer.OpenSessionReq ssReq = new SpaceServer.OpenSessionReq() {
@@ -59,8 +58,8 @@ namespace org.herbal3d.transport {
             if (SpaceServerMsgHandler != null) {
                 SpaceServer.OpenSessionResp ssResp = SpaceServerMsgHandler.OpenSession(ssReq);
                 pResp.Exception = ssResp.Exception;
-                if (pReq.Properties != null && pReq.Properties.Count > 0) {
-                    ssReq.Features.Add(pReq.Properties);
+                if (ssResp.Properties != null && ssResp.Properties.Count > 0) {
+                    pResp.Properties.Add(ssResp.Properties);
                 }
             }
             else {
@@ -68,6 +67,7 @@ namespace org.herbal3d.transport {
                     Reason = "Connection not initialized"
                 };
             }
+            MsgProcessor.MakeMessageAResponse(ref pResp, pReq);
             return pResp;
         }
 
@@ -89,6 +89,7 @@ namespace org.herbal3d.transport {
                     Reason = "Connection not initialized"
                 };
             }
+            MsgProcessor.MakeMessageAResponse(ref pResp, pReq);
             return pResp;
         }
 
@@ -107,6 +108,7 @@ namespace org.herbal3d.transport {
                     Reason = "Connection not initialized"
                 };
             }
+            MsgProcessor.MakeMessageAResponse(ref pResp, pReq);
             return pResp;
         }
     }

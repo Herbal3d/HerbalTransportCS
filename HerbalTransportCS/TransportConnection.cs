@@ -24,6 +24,7 @@ namespace org.herbal3d.transport {
 
         public event Action<TransportConnection> OnConnect;
         public event Action<TransportConnection> OnDisconnect;
+
         public enum ConnectionStates {
             INITIALIZING,
             OPEN,
@@ -57,19 +58,22 @@ namespace org.herbal3d.transport {
                             + ":"
                             + _connection.ConnectionInfo.ClientPort.ToString();
             ConnectionState = ConnectionStates.INITIALIZING;
+
+            _receiveQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
+            _sendQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
         }
 
         public void Start() {
-            _receiveQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
-            _sendQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
 
             // Tasks to push and pull from the input and output queues.
             // These tasks are here so the context will be this object instance rather than
             //     creating the tasks in the OnOpen event context.
             Task.Run(() => {
-                while (!_context.Cancellation.IsCancellationRequested && BasilMsgHandler != null) {
+                while (!_context.Cancellation.IsCancellationRequested) {
                     byte[] msg = _receiveQueue.Take();
-                    BasilMsgHandler.Receive(msg);
+                    if (BasilMsgHandler != null) {
+                        BasilMsgHandler.Receive(msg);
+                    }
                 }
             }, _context.Cancellation);
             Task.Run(() => {
@@ -79,8 +83,8 @@ namespace org.herbal3d.transport {
                 }
             }, _context.Cancellation);
 
-            _connection.OnOpen = () => { Connection_OnOpen(); };
-            _connection.OnClose = () => { Connection_OnClose(); };
+            _connection.OnOpen = Connection_OnOpen;
+            _connection.OnClose = Connection_OnClose;
             _connection.OnMessage = msg => { Connection_OnMessage(msg); };
             _connection.OnBinary = msg => { Connection_OnBinary(msg); };
             _connection.OnError = except => { Connection_OnError(except); };
