@@ -43,6 +43,7 @@ namespace org.herbal3d.transport {
 
         private readonly ISpaceServer _spaceServer;
         private List<TransportConnection> _transports = new List<TransportConnection>();
+        private Task _serverTask;
 
         public HerbalTransport(ISpaceServer pSpaceServer, IParameters pParams, BLogger pLog) {
             _spaceServer = pSpaceServer;
@@ -55,7 +56,7 @@ namespace org.herbal3d.transport {
         public void Start(CancellationTokenSource pCanceller) {
             _context.CancellationSource = pCanceller;
             _context.Cancellation = pCanceller.Token;
-            StartServer(_context);
+            StartServer();
         }
 
         public void Cancel() {
@@ -66,60 +67,83 @@ namespace org.herbal3d.transport {
             }
         }
 
-        private void StartServer(TransportContext pContext) {
-
-            FleckLog.Level = LogLevel.Warn;
-            List<TransportConnection> allClientConnections = new List<TransportConnection>();
-
-            // For debugging, it is possible to set up a non-encrypted connection
-            WebSocketServer server = null;
-            if (pContext.Params.P<bool>("IsSecure")) {
-                pContext.Log.DebugFormat("{0} Creating secure server", _logHeader);
-                server = new WebSocketServer(pContext.Params.P<string>("SecureConnectionURL")) {
-                    Certificate = new X509Certificate2(pContext.Params.P<string>("Certificate")),
-                    EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
+        private void StartServer() {
+            _serverTask = Task.Run(() => {
+                FleckLog.LogAction = (level, message, ex) => {
+                    switch (level) {
+                        case LogLevel.Debug:
+                            _context.Log.DebugFormat(message, ex);
+                            break;
+                        case LogLevel.Error:
+                            _context.Log.ErrorFormat(message, ex);
+                            break;
+                        case LogLevel.Warn:
+                            _context.Log.ErrorFormat(message, ex);
+                            break;
+                        default:
+                            _context.Log.InfoFormat(message, ex);
+                            break;
+                    }
                 };
-            }
-            else {
-                pContext.Log.DebugFormat("{0} Creating insecure server", _logHeader);
-                server = new WebSocketServer(pContext.Params.P<string>("ConnectionURL"));
-            }
+                FleckLog.Level = LogLevel.Warn;
+                // FleckLog.Level = LogLevel.Debug;
 
-            // Disable the ACK delay for better responsiveness
-            if (pContext.Params.P<bool>("DisableNaglesAlgorithm")) {
-                server.ListenerSocket.NoDelay = true;
-            }
+                List<TransportConnection> allClientConnections = new List<TransportConnection>();
 
-            // Loop around waiting for connections
-            using (server) {
-                server.Start(socket => {
-                    pContext.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
-                    lock (_transports) {
-                        TransportConnection transportConnection = new TransportConnection(socket, pContext);
-                        var basilConnection = new BasilConnection(_spaceServer, transportConnection, _context);
-                        transportConnection.BasilMsgHandler = basilConnection;
-                        var basilClient = new BasilClient(basilConnection, _context);
-                        transportConnection.OnConnect += transport => {
-                            pContext.Log.DebugFormat("{0} OnConnect event", _logHeader);
-                            // This is done last as it tells the SpaceServer that a connection is complete
-                            _spaceServer.SetClientConnection(basilClient);
-                        };
-                        transportConnection.OnDisconnect += transport => {
-                            pContext.Log.DebugFormat("{0} OnDisconnect event", _logHeader);
-                            lock (_transports) {
-                                pContext.Log.InfoFormat("{0} client disconnected", _logHeader);
-                                _transports.Remove(transport);
-                            }
-                        };
-                        _transports.Add(transportConnection);
-                        transportConnection.Start();
+                // For debugging, it is possible to set up a non-encrypted connection
+                WebSocketServer server = null;
+                if (_context.Params.P<bool>("IsSecure")) {
+                    string connectionURL = _context.Params.P<string>("SecureConnectionURL");
+                    _context.Log.DebugFormat("{0} Creating secure server on {1}", _logHeader, connectionURL);
+                    server = new WebSocketServer(connectionURL) {
+                        Certificate = new X509Certificate2(_context.Params.P<string>("Certificate")),
+                        EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
                     };
-
-                });
-                while (!pContext.Cancellation.IsCancellationRequested) {
-                    Thread.Sleep(250);
                 }
-            }
+                else {
+                    string connectionURL = _context.Params.P<string>("ConnectionURL");
+                    _context.Log.DebugFormat("{0} Creating insecure server on {1}", _logHeader, connectionURL);
+                    server = new WebSocketServer(connectionURL);
+                }
+
+                // Disable the ACK delay for better responsiveness
+                if (_context.Params.P<bool>("DisableNaglesAlgorithm")) {
+                    _context.Log.DebugFormat("{0} Disabling Nagles algorightm", _logHeader);
+                    server.ListenerSocket.NoDelay = true;
+                }
+
+                // Loop around waiting for connections
+                using (server) {
+                    server.Start(socket => {
+                        _context.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
+                        lock (_transports) {
+                            TransportConnection transportConnection = new TransportConnection(socket, _context);
+                            var basilConnection = new BasilConnection(_spaceServer, transportConnection, _context);
+                            transportConnection.BasilMsgHandler = basilConnection;
+                            var basilClient = new BasilClient(basilConnection, _context);
+                            transportConnection.OnConnect += transport => {
+                                _context.Log.DebugFormat("{0} OnConnect event", _logHeader);
+                                // This is done last as it tells the SpaceServer that a connection is complete
+                                _spaceServer.SetClientConnection(basilClient);
+                            };
+                            transportConnection.OnDisconnect += transport => {
+                                _context.Log.DebugFormat("{0} OnDisconnect event", _logHeader);
+                                lock (_transports) {
+                                    _context.Log.InfoFormat("{0} client disconnected", _logHeader);
+                                    _transports.Remove(transport);
+                                }
+                            };
+                            _transports.Add(transportConnection);
+                            transportConnection.Start();
+                        };
+
+                    });
+                    while (!_context.Cancellation.IsCancellationRequested) {
+                        Task.Delay(250).Wait();
+                    }
+                }
+                _context.Log.DebugFormat("{0} Exiting server listen task", _logHeader);
+            }, _context.Cancellation);
         }
 
     }
