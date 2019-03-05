@@ -53,6 +53,12 @@ namespace org.herbal3d.transport {
             _connection = pConnection;
             _context = pContext;
 
+            _connection.OnOpen = Connection_OnOpen;
+            _connection.OnClose = Connection_OnClose;
+            _connection.OnMessage = msg => { Connection_OnMessage(msg); };
+            _connection.OnBinary = msg => { Connection_OnBinary(msg); };
+            _connection.OnError = except => { Connection_OnError(except); };
+
             Id = _connection.ConnectionInfo.Id.ToString();
             ConnectionName = _connection.ConnectionInfo.ClientIpAddress.ToString()
                             + ":"
@@ -82,12 +88,6 @@ namespace org.herbal3d.transport {
                     _connection.Send(msg);
                 }
             }, _context.Cancellation);
-
-            _connection.OnOpen = Connection_OnOpen;
-            _connection.OnClose = Connection_OnClose;
-            _connection.OnMessage = msg => { Connection_OnMessage(msg); };
-            _connection.OnBinary = msg => { Connection_OnBinary(msg); };
-            _connection.OnError = except => { Connection_OnError(except); };
         }
 
         public void Disconnect() {

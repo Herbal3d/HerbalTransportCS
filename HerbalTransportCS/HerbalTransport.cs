@@ -70,7 +70,6 @@ namespace org.herbal3d.transport {
         private void StartServer() {
             _serverTask = Task.Run(() => {
                 FleckLog.Level = LogLevel.Info;
-                /*  Uncomment this if you want Fleck messages
                 //  Haven't been able to get FleckLog.Level to set to anything other than 'Debug'
                 FleckLog.Level = LogLevel.Debug;
                 FleckLog.LogAction = (level, message, ex) => {
@@ -89,6 +88,7 @@ namespace org.herbal3d.transport {
                             break;
                     }
                 };
+                /*  Uncomment this if you want Fleck messages
                 */
 
                 List<TransportConnection> allClientConnections = new List<TransportConnection>();
@@ -121,9 +121,11 @@ namespace org.herbal3d.transport {
                         _context.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
                         lock (_transports) {
                             TransportConnection transportConnection = new TransportConnection(socket, _context);
+
                             var basilConnection = new BasilConnection(_spaceServer, transportConnection, _context);
                             transportConnection.BasilMsgHandler = basilConnection;
-                            var basilClient = new BasilClient(basilConnection, _context);
+                            BasilClient basilClient = new BasilClient(basilConnection, _context);
+
                             transportConnection.OnConnect += transport => {
                                 _context.Log.DebugFormat("{0} OnConnect event", _logHeader);
                                 // This is done last as it tells the SpaceServer that a connection is complete
@@ -136,6 +138,7 @@ namespace org.herbal3d.transport {
                                     _transports.Remove(transport);
                                 }
                             };
+
                             _transports.Add(transportConnection);
                             transportConnection.Start();
                         };
