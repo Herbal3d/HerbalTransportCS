@@ -70,6 +70,7 @@ namespace org.herbal3d.transport {
         private void StartServer() {
             _serverTask = Task.Run(() => {
                 FleckLog.Level = LogLevel.Info;
+                /*  Uncomment this if you want Fleck messages
                 //  Haven't been able to get FleckLog.Level to set to anything other than 'Debug'
                 FleckLog.Level = LogLevel.Debug;
                 FleckLog.LogAction = (level, message, ex) => {
@@ -88,7 +89,6 @@ namespace org.herbal3d.transport {
                             break;
                     }
                 };
-                /*  Uncomment this if you want Fleck messages
                 */
 
                 List<TransportConnection> allClientConnections = new List<TransportConnection>();

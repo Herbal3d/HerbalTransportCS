@@ -53,6 +53,9 @@ namespace org.herbal3d.transport {
             _connection = pConnection;
             _context = pContext;
 
+            _receiveQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
+            _sendQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
+
             _connection.OnOpen = Connection_OnOpen;
             _connection.OnClose = Connection_OnClose;
             _connection.OnMessage = msg => { Connection_OnMessage(msg); };
@@ -64,9 +67,6 @@ namespace org.herbal3d.transport {
                             + ":"
                             + _connection.ConnectionInfo.ClientPort.ToString();
             ConnectionState = ConnectionStates.INITIALIZING;
-
-            _receiveQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
-            _sendQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
         }
 
         public void Start() {
