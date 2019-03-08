@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 
 using BasilType = org.herbal3d.basil.protocol.BasilType;
 using BasilMessage = org.herbal3d.basil.protocol.Message;
+using Basil = org.herbal3d.basil.protocol.BasilServer;
 
 namespace org.herbal3d.transport {
     public class BasilClient  {
@@ -29,7 +30,7 @@ namespace org.herbal3d.transport {
             _context = pContext;
         }
 
-        public async Task<BasilMessage.BasilMessage> IdentifyDisplayableObjectAsync(
+        public async Task<Basil.IdentifyDisplayableObjectResp> IdentifyDisplayableObjectAsync(
                         BasilType.AccessAuthorization pAuth,
                         BasilType.AssetInformation pAsset,
                         BasilType.AaBoundingBox pAabb) {
@@ -39,10 +40,14 @@ namespace org.herbal3d.transport {
                 AssetInfo = pAsset,
                 Aabb = pAabb
             };
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            return new Basil.IdentifyDisplayableObjectResp() {
+                Exception = resp.Exception,
+                ObjectId = resp.ObjectId
+            };
         }
 
-        public async Task<BasilMessage.BasilMessage> ForgetDisplayableObjectAsync(
+        public async Task<Basil.ForgetDisplayableObjectResp> ForgetDisplayableObjectAsync(
                         BasilType.AccessAuthorization pAuth,
                         BasilType.ObjectIdentifier pId) {
             var req = new BasilMessage.BasilMessage() {
@@ -50,10 +55,13 @@ namespace org.herbal3d.transport {
                 Auth = pAuth,
                 ObjectId = pId
             };
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            return new Basil.ForgetDisplayableObjectResp() {
+                Exception = resp.Exception
+            };
         }
 
-        public async Task<BasilMessage.BasilMessage> CreateObjectInstanceAsync(
+        public async Task<Basil.CreateObjectInstanceResp> CreateObjectInstanceAsync(
                         BasilType.AccessAuthorization pAuth,
                         BasilType.ObjectIdentifier pId,
                         BasilType.InstancePositionInfo pInstancePositionInfo) {
@@ -63,27 +71,14 @@ namespace org.herbal3d.transport {
                 ObjectId = pId,
                 Pos = pInstancePositionInfo,
             };
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
-        }
-
-        public async Task<BasilMessage.BasilMessage> CreateObjectInstanceAsync(
-                        BasilType.AccessAuthorization pAuth,
-                        BasilType.ObjectIdentifier pId,
-                        BasilType.InstancePositionInfo pInstancePositionInfo,
-                        Dictionary<string,string> pPropertyList) {
-            var req = new BasilMessage.BasilMessage {
-                Op = (Int32)BasilMessage.BasilMessageOps.CreateObjectInstanceReq,
-                Auth = pAuth,
-                ObjectId = pId,
-                Pos = pInstancePositionInfo,
+            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            return new Basil.CreateObjectInstanceResp() {
+                Exception = resp.Exception,
+                InstanceId = resp.InstanceId
             };
-            if (pPropertyList != null) {
-                req.Properties.Add(pPropertyList);
-            }
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
         }
 
-        public async Task<BasilMessage.BasilMessage> DeleteObjectInstanceAsync(
+        public async Task<Basil.DeleteObjectInstanceResp> DeleteObjectInstanceAsync(
                         BasilType.AccessAuthorization pAuth,
                         BasilType.InstanceIdentifier pId) {
             var req = new BasilMessage.BasilMessage {
@@ -91,10 +86,13 @@ namespace org.herbal3d.transport {
                 Auth = pAuth,
                 InstanceId = pId
             };
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            return new Basil.DeleteObjectInstanceResp() {
+                Exception = resp.Exception
+            };
         }
 
-        public async Task<BasilMessage.BasilMessage> UpdateObjectPropertyAsync(
+        public async Task<Basil.UpdateInstancePositionResp> UpdateObjectPropertyAsync(
                         BasilType.AccessAuthorization pAuth,
                         BasilType.ObjectIdentifier pId,
                         Dictionary<string,string> pPropertyList) {
@@ -104,10 +102,13 @@ namespace org.herbal3d.transport {
                 ObjectId = pId
             };
             req.Properties.Add(pPropertyList);
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            return new Basil.UpdateInstancePositionResp() {
+                Exception = resp.Exception
+            };
         }
 
-        public async Task<BasilMessage.BasilMessage> UpdateInstancePropertyAsync(
+        public async Task<Basil.UpdateInstancePropertyResp> UpdateInstancePropertyAsync(
                         BasilType.AccessAuthorization pAuth,
                         BasilType.InstanceIdentifier pId,
                         Dictionary<string,string> pPropertyList) {
@@ -117,9 +118,12 @@ namespace org.herbal3d.transport {
                 InstanceId = pId
             };
             req.Properties.Add(pPropertyList);
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            return new Basil.UpdateInstancePropertyResp() {
+                Exception = resp.Exception
+            };
         }
-        public async Task<BasilMessage.BasilMessage> UpdateInstancePositionAsync(
+        public async Task<Basil.UpdateInstancePositionResp> UpdateInstancePositionAsync(
                         BasilType.AccessAuthorization pAuth,
                         BasilType.InstanceIdentifier pId,
                         BasilType.InstancePositionInfo pInstancePositionInfo) {
@@ -129,9 +133,12 @@ namespace org.herbal3d.transport {
                 InstanceId = pId,
                 Pos = pInstancePositionInfo
             };
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            return new Basil.UpdateInstancePositionResp() {
+                Exception = resp.Exception
+            };
         }
-        public async Task<BasilMessage.BasilMessage> RequestObjectPropertiesAsync(
+        public async Task<Basil.RequestObjectPropertiesResp> RequestObjectPropertiesAsync(
                         BasilType.AccessAuthorization pAuth,
                         BasilType.ObjectIdentifier pId,
                         string pPropertyMatch) {
@@ -141,10 +148,15 @@ namespace org.herbal3d.transport {
                 ObjectId = pId,
                 Filter = pPropertyMatch
             };
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            var ret = new Basil.RequestObjectPropertiesResp() {
+                Exception = resp.Exception
+            };
+            ret.Properties.Add(resp.Properties);
+            return ret;
         }
 
-        public async Task<BasilMessage.BasilMessage> RequestInstancePropertiesAsync(
+        public async Task<Basil.RequestInstancePropertiesResp> RequestInstancePropertiesAsync(
                         BasilType.AccessAuthorization pAuth,
                         BasilType.InstanceIdentifier pId,
                         string pPropertyMatch) {
@@ -154,14 +166,19 @@ namespace org.herbal3d.transport {
                 InstanceId = pId,
                 Filter = pPropertyMatch
             };
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            var ret = new Basil.RequestInstancePropertiesResp() {
+                Exception = resp.Exception
+            };
+            ret.Properties.Add(resp.Properties);
+            return ret;
         }
 
         // RESOURCE MANAGEMENT =========================================
 
         // CONNECTION MANAGEMENT =======================================
 
-        public async Task<BasilMessage.BasilMessage> CloseSessionAsync(
+        public async Task<Basil.CloseSessionResp> CloseSessionAsync(
                         BasilType.AccessAuthorization pAuth,
                         string pReason) {
             var req = new BasilMessage.BasilMessage {
@@ -169,10 +186,13 @@ namespace org.herbal3d.transport {
                 Auth = pAuth
             };
             req.OpParameters.Add("reason", pReason);
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            return new Basil.CloseSessionResp() {
+                Exception = resp.Exception
+            };
         }
 
-        public async Task<BasilMessage.BasilMessage> MakeConnectionAsync(
+        public async Task<Basil.MakeConnectionResp> MakeConnectionAsync(
                         BasilType.AccessAuthorization pAuth,
                         Dictionary<string,string> pConnectionParams) {
             var req = new BasilMessage.BasilMessage {
@@ -180,7 +200,10 @@ namespace org.herbal3d.transport {
                 Auth = pAuth,
             };
             req.Properties.Add(pConnectionParams);
-            return await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            return new Basil.MakeConnectionResp() {
+                Exception = resp.Exception
+            };
         }
     }
 }
