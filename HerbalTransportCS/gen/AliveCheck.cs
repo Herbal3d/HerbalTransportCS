@@ -70,7 +70,7 @@ namespace org.herbal3d.basil.protocol.AliveCheck {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public AliveCheckReq(AliveCheckReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
       time_ = other.time_;
       sequenceNum_ = other.sequenceNum_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -197,7 +197,7 @@ namespace org.herbal3d.basil.protocol.AliveCheck {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
@@ -220,9 +220,9 @@ namespace org.herbal3d.basil.protocol.AliveCheck {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 16: {

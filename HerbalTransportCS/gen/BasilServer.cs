@@ -189,10 +189,10 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public IdentifyDisplayableObjectReq(IdentifyDisplayableObjectReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
-      AssetInfo = other.assetInfo_ != null ? other.AssetInfo.Clone() : null;
-      ObjectId = other.objectId_ != null ? other.ObjectId.Clone() : null;
-      Aabb = other.aabb_ != null ? other.Aabb.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
+      assetInfo_ = other.assetInfo_ != null ? other.assetInfo_.Clone() : null;
+      objectId_ = other.objectId_ != null ? other.objectId_.Clone() : null;
+      aabb_ = other.aabb_ != null ? other.aabb_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -337,25 +337,25 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
       if (other.assetInfo_ != null) {
         if (assetInfo_ == null) {
-          assetInfo_ = new global::org.herbal3d.basil.protocol.BasilType.AssetInformation();
+          AssetInfo = new global::org.herbal3d.basil.protocol.BasilType.AssetInformation();
         }
         AssetInfo.MergeFrom(other.AssetInfo);
       }
       if (other.objectId_ != null) {
         if (objectId_ == null) {
-          objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+          ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
         }
         ObjectId.MergeFrom(other.ObjectId);
       }
       if (other.aabb_ != null) {
         if (aabb_ == null) {
-          aabb_ = new global::org.herbal3d.basil.protocol.BasilType.AaBoundingBox();
+          Aabb = new global::org.herbal3d.basil.protocol.BasilType.AaBoundingBox();
         }
         Aabb.MergeFrom(other.Aabb);
       }
@@ -372,30 +372,30 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 18: {
             if (assetInfo_ == null) {
-              assetInfo_ = new global::org.herbal3d.basil.protocol.BasilType.AssetInformation();
+              AssetInfo = new global::org.herbal3d.basil.protocol.BasilType.AssetInformation();
             }
-            input.ReadMessage(assetInfo_);
+            input.ReadMessage(AssetInfo);
             break;
           }
           case 26: {
             if (objectId_ == null) {
-              objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+              ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
             }
-            input.ReadMessage(objectId_);
+            input.ReadMessage(ObjectId);
             break;
           }
           case 34: {
             if (aabb_ == null) {
-              aabb_ = new global::org.herbal3d.basil.protocol.BasilType.AaBoundingBox();
+              Aabb = new global::org.herbal3d.basil.protocol.BasilType.AaBoundingBox();
             }
-            input.ReadMessage(aabb_);
+            input.ReadMessage(Aabb);
             break;
           }
         }
@@ -429,8 +429,8 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public IdentifyDisplayableObjectResp(IdentifyDisplayableObjectResp other) : this() {
-      Exception = other.exception_ != null ? other.Exception.Clone() : null;
-      ObjectId = other.objectId_ != null ? other.ObjectId.Clone() : null;
+      exception_ = other.exception_ != null ? other.exception_.Clone() : null;
+      objectId_ = other.objectId_ != null ? other.objectId_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -532,13 +532,13 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.exception_ != null) {
         if (exception_ == null) {
-          exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+          Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
         }
         Exception.MergeFrom(other.Exception);
       }
       if (other.objectId_ != null) {
         if (objectId_ == null) {
-          objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+          ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
         }
         ObjectId.MergeFrom(other.ObjectId);
       }
@@ -555,16 +555,16 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (exception_ == null) {
-              exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+              Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
             }
-            input.ReadMessage(exception_);
+            input.ReadMessage(Exception);
             break;
           }
           case 18: {
             if (objectId_ == null) {
-              objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+              ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
             }
-            input.ReadMessage(objectId_);
+            input.ReadMessage(ObjectId);
             break;
           }
         }
@@ -598,8 +598,8 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ForgetDisplayableObjectReq(ForgetDisplayableObjectReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
-      ObjectId = other.objectId_ != null ? other.ObjectId.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
+      objectId_ = other.objectId_ != null ? other.objectId_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -701,13 +701,13 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
       if (other.objectId_ != null) {
         if (objectId_ == null) {
-          objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+          ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
         }
         ObjectId.MergeFrom(other.ObjectId);
       }
@@ -724,16 +724,16 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 18: {
             if (objectId_ == null) {
-              objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+              ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
             }
-            input.ReadMessage(objectId_);
+            input.ReadMessage(ObjectId);
             break;
           }
         }
@@ -767,7 +767,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ForgetDisplayableObjectResp(ForgetDisplayableObjectResp other) : this() {
-      Exception = other.exception_ != null ? other.Exception.Clone() : null;
+      exception_ = other.exception_ != null ? other.exception_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -849,7 +849,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.exception_ != null) {
         if (exception_ == null) {
-          exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+          Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
         }
         Exception.MergeFrom(other.Exception);
       }
@@ -866,9 +866,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (exception_ == null) {
-              exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+              Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
             }
-            input.ReadMessage(exception_);
+            input.ReadMessage(Exception);
             break;
           }
         }
@@ -907,10 +907,10 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public CreateObjectInstanceReq(CreateObjectInstanceReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
-      ObjectId = other.objectId_ != null ? other.ObjectId.Clone() : null;
-      InstanceId = other.instanceId_ != null ? other.InstanceId.Clone() : null;
-      Pos = other.pos_ != null ? other.Pos.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
+      objectId_ = other.objectId_ != null ? other.objectId_.Clone() : null;
+      instanceId_ = other.instanceId_ != null ? other.instanceId_.Clone() : null;
+      pos_ = other.pos_ != null ? other.pos_.Clone() : null;
       propertiesToSet_ = other.propertiesToSet_.Clone();
       instanceCountHint_ = other.instanceCountHint_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -1094,25 +1094,25 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
       if (other.objectId_ != null) {
         if (objectId_ == null) {
-          objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+          ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
         }
         ObjectId.MergeFrom(other.ObjectId);
       }
       if (other.instanceId_ != null) {
         if (instanceId_ == null) {
-          instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+          InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
         }
         InstanceId.MergeFrom(other.InstanceId);
       }
       if (other.pos_ != null) {
         if (pos_ == null) {
-          pos_ = new global::org.herbal3d.basil.protocol.BasilType.InstancePositionInfo();
+          Pos = new global::org.herbal3d.basil.protocol.BasilType.InstancePositionInfo();
         }
         Pos.MergeFrom(other.Pos);
       }
@@ -1133,30 +1133,30 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 18: {
             if (objectId_ == null) {
-              objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+              ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
             }
-            input.ReadMessage(objectId_);
+            input.ReadMessage(ObjectId);
             break;
           }
           case 26: {
             if (instanceId_ == null) {
-              instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+              InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
             }
-            input.ReadMessage(instanceId_);
+            input.ReadMessage(InstanceId);
             break;
           }
           case 34: {
             if (pos_ == null) {
-              pos_ = new global::org.herbal3d.basil.protocol.BasilType.InstancePositionInfo();
+              Pos = new global::org.herbal3d.basil.protocol.BasilType.InstancePositionInfo();
             }
-            input.ReadMessage(pos_);
+            input.ReadMessage(Pos);
             break;
           }
           case 42: {
@@ -1198,8 +1198,8 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public CreateObjectInstanceResp(CreateObjectInstanceResp other) : this() {
-      Exception = other.exception_ != null ? other.Exception.Clone() : null;
-      InstanceId = other.instanceId_ != null ? other.InstanceId.Clone() : null;
+      exception_ = other.exception_ != null ? other.exception_.Clone() : null;
+      instanceId_ = other.instanceId_ != null ? other.instanceId_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1301,13 +1301,13 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.exception_ != null) {
         if (exception_ == null) {
-          exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+          Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
         }
         Exception.MergeFrom(other.Exception);
       }
       if (other.instanceId_ != null) {
         if (instanceId_ == null) {
-          instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+          InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
         }
         InstanceId.MergeFrom(other.InstanceId);
       }
@@ -1324,16 +1324,16 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (exception_ == null) {
-              exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+              Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
             }
-            input.ReadMessage(exception_);
+            input.ReadMessage(Exception);
             break;
           }
           case 18: {
             if (instanceId_ == null) {
-              instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+              InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
             }
-            input.ReadMessage(instanceId_);
+            input.ReadMessage(InstanceId);
             break;
           }
         }
@@ -1367,8 +1367,8 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public DeleteObjectInstanceReq(DeleteObjectInstanceReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
-      InstanceId = other.instanceId_ != null ? other.InstanceId.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
+      instanceId_ = other.instanceId_ != null ? other.instanceId_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1470,13 +1470,13 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
       if (other.instanceId_ != null) {
         if (instanceId_ == null) {
-          instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+          InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
         }
         InstanceId.MergeFrom(other.InstanceId);
       }
@@ -1493,16 +1493,16 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 18: {
             if (instanceId_ == null) {
-              instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+              InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
             }
-            input.ReadMessage(instanceId_);
+            input.ReadMessage(InstanceId);
             break;
           }
         }
@@ -1536,7 +1536,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public DeleteObjectInstanceResp(DeleteObjectInstanceResp other) : this() {
-      Exception = other.exception_ != null ? other.Exception.Clone() : null;
+      exception_ = other.exception_ != null ? other.exception_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1618,7 +1618,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.exception_ != null) {
         if (exception_ == null) {
-          exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+          Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
         }
         Exception.MergeFrom(other.Exception);
       }
@@ -1635,9 +1635,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (exception_ == null) {
-              exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+              Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
             }
-            input.ReadMessage(exception_);
+            input.ReadMessage(Exception);
             break;
           }
         }
@@ -1674,8 +1674,8 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public UpdateObjectPropertyReq(UpdateObjectPropertyReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
-      ObjectId = other.objectId_ != null ? other.ObjectId.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
+      objectId_ = other.objectId_ != null ? other.objectId_.Clone() : null;
       props_ = other.props_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -1792,13 +1792,13 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
       if (other.objectId_ != null) {
         if (objectId_ == null) {
-          objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+          ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
         }
         ObjectId.MergeFrom(other.ObjectId);
       }
@@ -1816,16 +1816,16 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 18: {
             if (objectId_ == null) {
-              objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+              ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
             }
-            input.ReadMessage(objectId_);
+            input.ReadMessage(ObjectId);
             break;
           }
           case 26: {
@@ -1863,7 +1863,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public UpdateObjectPropertyResp(UpdateObjectPropertyResp other) : this() {
-      Exception = other.exception_ != null ? other.Exception.Clone() : null;
+      exception_ = other.exception_ != null ? other.exception_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1945,7 +1945,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.exception_ != null) {
         if (exception_ == null) {
-          exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+          Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
         }
         Exception.MergeFrom(other.Exception);
       }
@@ -1962,9 +1962,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (exception_ == null) {
-              exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+              Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
             }
-            input.ReadMessage(exception_);
+            input.ReadMessage(Exception);
             break;
           }
         }
@@ -2001,8 +2001,8 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public UpdateInstancePropertyReq(UpdateInstancePropertyReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
-      InstanceId = other.instanceId_ != null ? other.InstanceId.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
+      instanceId_ = other.instanceId_ != null ? other.instanceId_.Clone() : null;
       props_ = other.props_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -2119,13 +2119,13 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
       if (other.instanceId_ != null) {
         if (instanceId_ == null) {
-          instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+          InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
         }
         InstanceId.MergeFrom(other.InstanceId);
       }
@@ -2143,16 +2143,16 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 18: {
             if (instanceId_ == null) {
-              instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+              InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
             }
-            input.ReadMessage(instanceId_);
+            input.ReadMessage(InstanceId);
             break;
           }
           case 26: {
@@ -2190,7 +2190,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public UpdateInstancePropertyResp(UpdateInstancePropertyResp other) : this() {
-      Exception = other.exception_ != null ? other.Exception.Clone() : null;
+      exception_ = other.exception_ != null ? other.exception_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2272,7 +2272,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.exception_ != null) {
         if (exception_ == null) {
-          exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+          Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
         }
         Exception.MergeFrom(other.Exception);
       }
@@ -2289,9 +2289,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (exception_ == null) {
-              exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+              Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
             }
-            input.ReadMessage(exception_);
+            input.ReadMessage(Exception);
             break;
           }
         }
@@ -2328,9 +2328,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public UpdateInstancePositionReq(UpdateInstancePositionReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
-      InstanceId = other.instanceId_ != null ? other.InstanceId.Clone() : null;
-      Pos = other.pos_ != null ? other.Pos.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
+      instanceId_ = other.instanceId_ != null ? other.instanceId_.Clone() : null;
+      pos_ = other.pos_ != null ? other.pos_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2452,19 +2452,19 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
       if (other.instanceId_ != null) {
         if (instanceId_ == null) {
-          instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+          InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
         }
         InstanceId.MergeFrom(other.InstanceId);
       }
       if (other.pos_ != null) {
         if (pos_ == null) {
-          pos_ = new global::org.herbal3d.basil.protocol.BasilType.InstancePositionInfo();
+          Pos = new global::org.herbal3d.basil.protocol.BasilType.InstancePositionInfo();
         }
         Pos.MergeFrom(other.Pos);
       }
@@ -2481,23 +2481,23 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 18: {
             if (instanceId_ == null) {
-              instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+              InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
             }
-            input.ReadMessage(instanceId_);
+            input.ReadMessage(InstanceId);
             break;
           }
           case 26: {
             if (pos_ == null) {
-              pos_ = new global::org.herbal3d.basil.protocol.BasilType.InstancePositionInfo();
+              Pos = new global::org.herbal3d.basil.protocol.BasilType.InstancePositionInfo();
             }
-            input.ReadMessage(pos_);
+            input.ReadMessage(Pos);
             break;
           }
         }
@@ -2531,7 +2531,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public UpdateInstancePositionResp(UpdateInstancePositionResp other) : this() {
-      Exception = other.exception_ != null ? other.Exception.Clone() : null;
+      exception_ = other.exception_ != null ? other.exception_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -2613,7 +2613,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.exception_ != null) {
         if (exception_ == null) {
-          exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+          Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
         }
         Exception.MergeFrom(other.Exception);
       }
@@ -2630,9 +2630,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (exception_ == null) {
-              exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+              Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
             }
-            input.ReadMessage(exception_);
+            input.ReadMessage(Exception);
             break;
           }
         }
@@ -2669,8 +2669,8 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public RequestObjectPropertiesReq(RequestObjectPropertiesReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
-      ObjectId = other.objectId_ != null ? other.ObjectId.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
+      objectId_ = other.objectId_ != null ? other.objectId_.Clone() : null;
       propertyMatch_ = other.propertyMatch_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -2796,13 +2796,13 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
       if (other.objectId_ != null) {
         if (objectId_ == null) {
-          objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+          ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
         }
         ObjectId.MergeFrom(other.ObjectId);
       }
@@ -2822,16 +2822,16 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 18: {
             if (objectId_ == null) {
-              objectId_ = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
+              ObjectId = new global::org.herbal3d.basil.protocol.BasilType.ObjectIdentifier();
             }
-            input.ReadMessage(objectId_);
+            input.ReadMessage(ObjectId);
             break;
           }
           case 26: {
@@ -2869,7 +2869,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public RequestObjectPropertiesResp(RequestObjectPropertiesResp other) : this() {
-      Exception = other.exception_ != null ? other.Exception.Clone() : null;
+      exception_ = other.exception_ != null ? other.exception_.Clone() : null;
       properties_ = other.properties_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -2966,7 +2966,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.exception_ != null) {
         if (exception_ == null) {
-          exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+          Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
         }
         Exception.MergeFrom(other.Exception);
       }
@@ -2984,9 +2984,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (exception_ == null) {
-              exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+              Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
             }
-            input.ReadMessage(exception_);
+            input.ReadMessage(Exception);
             break;
           }
           case 18: {
@@ -3027,8 +3027,8 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public RequestInstancePropertiesReq(RequestInstancePropertiesReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
-      InstanceId = other.instanceId_ != null ? other.InstanceId.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
+      instanceId_ = other.instanceId_ != null ? other.instanceId_.Clone() : null;
       propertyMatch_ = other.propertyMatch_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -3154,13 +3154,13 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
       if (other.instanceId_ != null) {
         if (instanceId_ == null) {
-          instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+          InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
         }
         InstanceId.MergeFrom(other.InstanceId);
       }
@@ -3180,16 +3180,16 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 18: {
             if (instanceId_ == null) {
-              instanceId_ = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
+              InstanceId = new global::org.herbal3d.basil.protocol.BasilType.InstanceIdentifier();
             }
-            input.ReadMessage(instanceId_);
+            input.ReadMessage(InstanceId);
             break;
           }
           case 26: {
@@ -3227,7 +3227,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public RequestInstancePropertiesResp(RequestInstancePropertiesResp other) : this() {
-      Exception = other.exception_ != null ? other.Exception.Clone() : null;
+      exception_ = other.exception_ != null ? other.exception_.Clone() : null;
       properties_ = other.properties_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -3324,7 +3324,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.exception_ != null) {
         if (exception_ == null) {
-          exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+          Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
         }
         Exception.MergeFrom(other.Exception);
       }
@@ -3342,9 +3342,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (exception_ == null) {
-              exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+              Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
             }
-            input.ReadMessage(exception_);
+            input.ReadMessage(Exception);
             break;
           }
           case 18: {
@@ -3382,7 +3382,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public CloseSessionReq(CloseSessionReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
       reason_ = other.reason_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -3488,7 +3488,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
@@ -3508,9 +3508,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 18: {
@@ -3548,7 +3548,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public CloseSessionResp(CloseSessionResp other) : this() {
-      Exception = other.exception_ != null ? other.Exception.Clone() : null;
+      exception_ = other.exception_ != null ? other.exception_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3630,7 +3630,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.exception_ != null) {
         if (exception_ == null) {
-          exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+          Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
         }
         Exception.MergeFrom(other.Exception);
       }
@@ -3647,9 +3647,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (exception_ == null) {
-              exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+              Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
             }
-            input.ReadMessage(exception_);
+            input.ReadMessage(Exception);
             break;
           }
         }
@@ -3686,7 +3686,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public MakeConnectionReq(MakeConnectionReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
       connectionParams_ = other.connectionParams_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -3783,7 +3783,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
@@ -3801,9 +3801,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 18: {
@@ -3841,7 +3841,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public MakeConnectionResp(MakeConnectionResp other) : this() {
-      Exception = other.exception_ != null ? other.Exception.Clone() : null;
+      exception_ = other.exception_ != null ? other.exception_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3923,7 +3923,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.exception_ != null) {
         if (exception_ == null) {
-          exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+          Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
         }
         Exception.MergeFrom(other.Exception);
       }
@@ -3940,9 +3940,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (exception_ == null) {
-              exception_ = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
+              Exception = new global::org.herbal3d.basil.protocol.BasilType.BasilException();
             }
-            input.ReadMessage(exception_);
+            input.ReadMessage(Exception);
             break;
           }
         }
@@ -3979,7 +3979,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public AliveCheckReq(AliveCheckReq other) : this() {
-      Auth = other.auth_ != null ? other.Auth.Clone() : null;
+      auth_ = other.auth_ != null ? other.auth_.Clone() : null;
       time_ = other.time_;
       sequenceNum_ = other.sequenceNum_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -4106,7 +4106,7 @@ namespace org.herbal3d.basil.protocol.BasilServer {
       }
       if (other.auth_ != null) {
         if (auth_ == null) {
-          auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+          Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
         }
         Auth.MergeFrom(other.Auth);
       }
@@ -4129,9 +4129,9 @@ namespace org.herbal3d.basil.protocol.BasilServer {
             break;
           case 10: {
             if (auth_ == null) {
-              auth_ = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
+              Auth = new global::org.herbal3d.basil.protocol.BasilType.AccessAuthorization();
             }
-            input.ReadMessage(auth_);
+            input.ReadMessage(Auth);
             break;
           }
           case 16: {
