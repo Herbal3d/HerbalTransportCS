@@ -62,8 +62,7 @@ namespace org.herbal3d.transport {
 
         // A socket connection has been made to a Basil Server.
         // Initialize message receivers and senders.
-        public BasilConnection(ISpaceServer pSpaceServer,
-                        TransportConnection pConnection, TransportContext pContext) {
+        public BasilConnection(TransportConnection pConnection, TransportContext pContext) {
             Transport = pConnection;
             _context = pContext;
 
@@ -72,7 +71,7 @@ namespace org.herbal3d.transport {
 
             // Processors for received messages
             AliveCheckProcessor = new AliveCheckProcessor(this, _context);
-            SpaceServiceProcessor = new SpaceServerProcessor(this, pSpaceServer, _context);
+            SpaceServiceProcessor = new SpaceServerProcessor(this, _context);
             BasilClientProcessor = new BasilClientProcessor(this, _context);
         }
 

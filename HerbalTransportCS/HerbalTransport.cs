@@ -39,6 +39,10 @@ namespace org.herbal3d.transport {
     public class HerbalTransport {
         private static readonly string _logHeader = "[HerbalTransport]";
 
+        public event Action<TransportConnection> OnConnect;
+        public event Action<BasilConnection> OnBasilConnect;
+        public event Action<TransportConnection> OnDisconnect;
+
         public TransportContext _context;
 
         private readonly ISpaceServer _spaceServer;
@@ -91,8 +95,6 @@ namespace org.herbal3d.transport {
                 };
                 */
 
-                List<TransportConnection> allClientConnections = new List<TransportConnection>();
-
                 // For debugging, it is possible to set up a non-encrypted connection
                 WebSocketServer server = null;
                 if (_context.Params.P<bool>("IsSecure")) {
@@ -121,15 +123,13 @@ namespace org.herbal3d.transport {
                         _context.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
                         lock (_transports) {
                             TransportConnection transportConnection = new TransportConnection(socket, _context);
-
-                            var basilConnection = new BasilConnection(_spaceServer, transportConnection, _context);
-                            transportConnection.BasilMsgHandler = basilConnection;
-                            BasilClient basilClient = new BasilClient(basilConnection, _context);
-
+                            // When someone connects, set up BasilMessage processing
                             transportConnection.OnConnect += transport => {
                                 _context.Log.DebugFormat("{0} OnConnect event", _logHeader);
-                                // This is done last as it tells the SpaceServer that a connection is complete
-                                _spaceServer.SetClientConnection(basilClient);
+                                var basilConnection = new BasilConnection(transportConnection, _context);
+                                transportConnection.BasilMsgHandler = basilConnection;
+                                TriggerConnect(transport);
+                                TriggerBasilConnect(basilConnection);
                             };
                             transportConnection.OnDisconnect += transport => {
                                 _context.Log.DebugFormat("{0} OnDisconnect event", _logHeader);
@@ -137,12 +137,13 @@ namespace org.herbal3d.transport {
                                     _context.Log.InfoFormat("{0} client disconnected", _logHeader);
                                     _transports.Remove(transport);
                                 }
+                                transportConnection.BasilMsgHandler = null;
+                                TriggerDisconnect(transportConnection);
                             };
 
                             _transports.Add(transportConnection);
                             transportConnection.Start();
                         };
-
                     });
                     while (!_context.Cancellation.IsCancellationRequested) {
                         Task.Delay(250).Wait();
@@ -150,6 +151,36 @@ namespace org.herbal3d.transport {
                 }
                 _context.Log.DebugFormat("{0} Exiting server listen task", _logHeader);
             }, _context.Cancellation);
+        }
+
+        // The WebSocket connection is connected. Tell the listeners.
+        private void TriggerConnect(TransportConnection tConnection) {
+            Action<TransportConnection> actions = OnConnect;
+            if (actions != null) {
+                foreach (Action<TransportConnection> action in actions.GetInvocationList()) {
+                    action(tConnection);
+                }
+            }
+        }
+
+        // The WebSocket connection is connected. Tell the listeners.
+        private void TriggerBasilConnect(BasilConnection bConnection) {
+            Action<BasilConnection> actions = OnBasilConnect;
+            if (actions != null) {
+                foreach (Action<BasilConnection> action in actions.GetInvocationList()) {
+                    action(bConnection);
+                }
+            }
+        }
+
+        // The WebSocket connection is disconnected. Tell the listeners.
+        private void TriggerDisconnect(TransportConnection tConnection) {
+            Action<TransportConnection> actions = OnDisconnect;
+            if (actions != null) {
+                foreach (Action<TransportConnection> action in actions.GetInvocationList()) {
+                    action(tConnection);
+                }
+            }
         }
 
     }

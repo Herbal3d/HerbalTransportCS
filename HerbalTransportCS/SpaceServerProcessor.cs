@@ -20,8 +20,6 @@ using SpaceServer = org.herbal3d.basil.protocol.SpaceServer;
 
 namespace org.herbal3d.transport {
     public interface ISpaceServer {
-        void SetClientConnection(BasilClient pClient);  // called with class to talk to client
-
         SpaceServer.OpenSessionResp OpenSession(SpaceServer.OpenSessionReq pReq);
         SpaceServer.CloseSessionResp CloseSession(SpaceServer.CloseSessionReq pReq);
         SpaceServer.CameraViewResp CameraView(SpaceServer.CameraViewReq pReq);
@@ -30,12 +28,12 @@ namespace org.herbal3d.transport {
     // Message Basil might send to us as a SpaceServer.
     public class SpaceServerProcessor : MsgProcessor {
         // private static readonly string _logHeader = "[SpaceServerProcessor]";
+
+        // Must be set by eventually created SpaceServer for it to receive messages
         public ISpaceServer SpaceServerMsgHandler;
 
-        public SpaceServerProcessor(BasilConnection pConnection, ISpaceServer pSpaceServer, TransportContext pContext)
+        public SpaceServerProcessor(BasilConnection pConnection, TransportContext pContext)
                             : base(pConnection, pContext) {
-            SpaceServerMsgHandler = pSpaceServer;
-
             // Add processors for message ops
             BasilConnection.Processors processors = new BasilConnection.Processors {
                 { (Int32)BasilMessage.BasilMessageOps.OpenSessionReq, this.WrapOpenSession },
@@ -44,6 +42,10 @@ namespace org.herbal3d.transport {
             };
             Connection.AddMessageProcessors(processors);
         }
+
+        // Wrap the SpaceServer functions to hide the BasilMessage streaming hack (needed
+        //    for WebSockets) so that the Ragu internal code looks more like an RPC
+        //    processor for the defined message types.
 
         private BasilMessage.BasilMessage WrapOpenSession(BasilMessage.BasilMessage pReq) {
             _context.Log.DebugFormat("[SpaceServerProcessor] WrapOpenSession");

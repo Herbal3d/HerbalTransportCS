@@ -22,12 +22,10 @@ using Basil = org.herbal3d.basil.protocol.BasilServer;
 namespace org.herbal3d.transport {
     public class BasilClient  {
 
-        private readonly BasilConnection _basilConnection;
-        private readonly TransportContext _context;
+        public readonly BasilConnection Connection;
 
-        public BasilClient(BasilConnection pBasilConnection, TransportContext pContext) {
-            _basilConnection = pBasilConnection;
-            _context = pContext;
+        public BasilClient(BasilConnection pBasilConnection) {
+            Connection = pBasilConnection;
         }
 
         public async Task<Basil.IdentifyDisplayableObjectResp> IdentifyDisplayableObjectAsync(
@@ -40,7 +38,7 @@ namespace org.herbal3d.transport {
                 AssetInfo = pAsset,
                 Aabb = pAabb
             };
-            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await Connection.BasilClientProcessor.SendAndAwaitResponse(req);
             return new Basil.IdentifyDisplayableObjectResp() {
                 Exception = resp.Exception,
                 ObjectId = resp.ObjectId
@@ -55,7 +53,7 @@ namespace org.herbal3d.transport {
                 Auth = pAuth,
                 ObjectId = pId
             };
-            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await Connection.BasilClientProcessor.SendAndAwaitResponse(req);
             return new Basil.ForgetDisplayableObjectResp() {
                 Exception = resp.Exception
             };
@@ -71,7 +69,7 @@ namespace org.herbal3d.transport {
                 ObjectId = pId,
                 Pos = pInstancePositionInfo,
             };
-            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await Connection.BasilClientProcessor.SendAndAwaitResponse(req);
             return new Basil.CreateObjectInstanceResp() {
                 Exception = resp.Exception,
                 InstanceId = resp.InstanceId
@@ -86,7 +84,7 @@ namespace org.herbal3d.transport {
                 Auth = pAuth,
                 InstanceId = pId
             };
-            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await Connection.BasilClientProcessor.SendAndAwaitResponse(req);
             return new Basil.DeleteObjectInstanceResp() {
                 Exception = resp.Exception
             };
@@ -102,7 +100,7 @@ namespace org.herbal3d.transport {
                 ObjectId = pId
             };
             req.Properties.Add(pPropertyList);
-            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await Connection.BasilClientProcessor.SendAndAwaitResponse(req);
             return new Basil.UpdateInstancePositionResp() {
                 Exception = resp.Exception
             };
@@ -118,7 +116,7 @@ namespace org.herbal3d.transport {
                 InstanceId = pId
             };
             req.Properties.Add(pPropertyList);
-            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await Connection.BasilClientProcessor.SendAndAwaitResponse(req);
             return new Basil.UpdateInstancePropertyResp() {
                 Exception = resp.Exception
             };
@@ -133,7 +131,7 @@ namespace org.herbal3d.transport {
                 InstanceId = pId,
                 Pos = pInstancePositionInfo
             };
-            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await Connection.BasilClientProcessor.SendAndAwaitResponse(req);
             return new Basil.UpdateInstancePositionResp() {
                 Exception = resp.Exception
             };
@@ -148,7 +146,7 @@ namespace org.herbal3d.transport {
                 ObjectId = pId,
                 Filter = pPropertyMatch
             };
-            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await Connection.BasilClientProcessor.SendAndAwaitResponse(req);
             var ret = new Basil.RequestObjectPropertiesResp() {
                 Exception = resp.Exception
             };
@@ -166,7 +164,7 @@ namespace org.herbal3d.transport {
                 InstanceId = pId,
                 Filter = pPropertyMatch
             };
-            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await Connection.BasilClientProcessor.SendAndAwaitResponse(req);
             var ret = new Basil.RequestInstancePropertiesResp() {
                 Exception = resp.Exception
             };
@@ -186,7 +184,7 @@ namespace org.herbal3d.transport {
                 Auth = pAuth
             };
             req.OpParameters.Add("reason", pReason);
-            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await Connection.BasilClientProcessor.SendAndAwaitResponse(req);
             return new Basil.CloseSessionResp() {
                 Exception = resp.Exception
             };
@@ -200,7 +198,7 @@ namespace org.herbal3d.transport {
                 Auth = pAuth,
             };
             req.Properties.Add(pConnectionParams);
-            BasilMessage.BasilMessage resp = await _basilConnection.BasilClientProcessor.SendAndAwaitResponse(req);
+            BasilMessage.BasilMessage resp = await Connection.BasilClientProcessor.SendAndAwaitResponse(req);
             return new Basil.MakeConnectionResp() {
                 Exception = resp.Exception
             };
