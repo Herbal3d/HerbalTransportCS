@@ -49,6 +49,7 @@ namespace org.herbal3d.transport {
         private List<TransportConnection> _transports = new List<TransportConnection>();
         private Task _serverTask;
 
+        // In pParams, expects: ConnectionURL, IsSecure, SecureConnectionURL, DisableNaglesAlgorithm
         public HerbalTransport(ISpaceServer pSpaceServer, IParameters pParams, BLogger pLog) {
             _spaceServer = pSpaceServer;
             _context = new TransportContext() {
