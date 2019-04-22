@@ -56,15 +56,18 @@ namespace org.herbal3d.transport {
                 Params = pParams,
                 Log = pLog
             };
+            _context.Log.DebugFormat("{0} Initialization", _logHeader);
         }
 
         public void Start(CancellationTokenSource pCanceller) {
+            _context.Log.DebugFormat("{0} Start", _logHeader);
             _context.CancellationSource = pCanceller;
             _context.Cancellation = pCanceller.Token;
             StartServer();
         }
 
         public void Cancel() {
+            _context.Log.DebugFormat("{0} Cancel", _logHeader);
             if (_context != null && _context.CancellationSource != null) {
                 _context.CancellationSource.Cancel();
                 // _context.CancellationSource.Dispose();

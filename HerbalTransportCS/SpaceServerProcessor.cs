@@ -49,7 +49,9 @@ namespace org.herbal3d.transport {
 
         private BasilMessage.BasilMessage WrapOpenSession(BasilMessage.BasilMessage pReq) {
             _context.Log.DebugFormat("[SpaceServerProcessor] WrapOpenSession");
-            BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage();
+            BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage() {
+                Op = (Int32)BasilMessage.BasilMessageOps.OpenSessionResp
+            };
 
             SpaceServer.OpenSessionReq ssReq = new SpaceServer.OpenSessionReq() {
                 Auth = pReq.Auth,
@@ -74,7 +76,9 @@ namespace org.herbal3d.transport {
         }
 
         private BasilMessage.BasilMessage WrapCloseSession(BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage();
+            BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage() {
+                Op = (Int32)BasilMessage.BasilMessageOps.CloseSessionResp
+            };
 
             SpaceServer.CloseSessionReq ssReq = new SpaceServer.CloseSessionReq() {
                 Auth = pReq.Auth
@@ -96,7 +100,9 @@ namespace org.herbal3d.transport {
         }
 
         private BasilMessage.BasilMessage WrapCameraView(BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage();
+            BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage() {
+                Op = (Int32)BasilMessage.BasilMessageOps.CameraViewResp
+            };
 
             SpaceServer.CameraViewReq ssReq = new SpaceServer.CameraViewReq() {
                 Auth = pReq.Auth
