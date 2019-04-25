@@ -41,17 +41,15 @@ namespace org.herbal3d.transport {
 
         public event Action<TransportConnection> OnConnect;
         public event Action<BasilConnection> OnBasilConnect;
-        public event Action<TransportConnection> OnDisconnect;
+        public event Action<BasilConnection> OnDisconnect;
 
         public TransportContext _context;
 
-        private readonly ISpaceServer _spaceServer;
         private List<TransportConnection> _transports = new List<TransportConnection>();
         private Task _serverTask;
 
         // In pParams, expects: ConnectionURL, IsSecure, SecureConnectionURL, DisableNaglesAlgorithm
-        public HerbalTransport(ISpaceServer pSpaceServer, IParameters pParams, BLogger pLog) {
-            _spaceServer = pSpaceServer;
+        public HerbalTransport(IParameters pParams, BLogger pLog) {
             _context = new TransportContext() {
                 Params = pParams,
                 Log = pLog
@@ -141,8 +139,8 @@ namespace org.herbal3d.transport {
                                     _context.Log.InfoFormat("{0} client disconnected", _logHeader);
                                     _transports.Remove(transport);
                                 }
+                                TriggerDisconnect(transport.BasilMsgHandler);
                                 transportConnection.BasilMsgHandler = null;
-                                TriggerDisconnect(transportConnection);
                             };
 
                             _transports.Add(transportConnection);
@@ -178,11 +176,11 @@ namespace org.herbal3d.transport {
         }
 
         // The WebSocket connection is disconnected. Tell the listeners.
-        private void TriggerDisconnect(TransportConnection tConnection) {
-            Action<TransportConnection> actions = OnDisconnect;
+        private void TriggerDisconnect(BasilConnection pBasilConnection) {
+            Action<BasilConnection> actions = OnDisconnect;
             if (actions != null) {
-                foreach (Action<TransportConnection> action in actions.GetInvocationList()) {
-                    action(tConnection);
+                foreach (Action<BasilConnection> action in actions.GetInvocationList()) {
+                    action(pBasilConnection);
                 }
             }
         }
