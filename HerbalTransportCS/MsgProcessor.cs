@@ -67,11 +67,11 @@ namespace org.herbal3d.transport {
         // Called with a constructed response message and the stream message with the request.
         // Add the response information to the response message so other side can match
         //     the response to the request.
-        protected void SendMessage(BasilMessage.BasilMessage pResponseMsg, BasilMessage.BasilMessage pReqMsg) {
+        public void SendMessage(BasilMessage.BasilMessage pResponseMsg, BasilMessage.BasilMessage pReqMsg) {
             // string responseMsgName = _basilConnection.BasilMessageNameByOp[pResponseMsg.Op];
             // BasilTest.log.DebugFormat("{0} SendResponse: {1}", _logHeader, responseMsgName);
 
-            BasilMessage.BasilMessage msg = new BasilMessage.BasilMessage();
+            BasilMessage.BasilMessage msg = pResponseMsg;
             if (pReqMsg != null && pReqMsg.Response != null) {
                 msg.Response = pReqMsg.Response;
             }
