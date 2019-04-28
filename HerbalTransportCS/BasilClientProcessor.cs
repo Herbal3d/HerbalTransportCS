@@ -32,6 +32,7 @@ namespace org.herbal3d.transport {
                 { (Int32)BasilMessage.BasilMessageOps.DeleteObjectInstanceResp, this.HandleResponse },
                 { (Int32)BasilMessage.BasilMessageOps.UpdateObjectPropertyResp, this.HandleResponse },
                 { (Int32)BasilMessage.BasilMessageOps.UpdateInstancePropertyResp, this.HandleResponse },
+                { (Int32)BasilMessage.BasilMessageOps.UpdateInstancePositionResp, this.HandleResponse },
                 { (Int32)BasilMessage.BasilMessageOps.RequestObjectPropertiesResp, this.HandleResponse },
                 { (Int32)BasilMessage.BasilMessageOps.RequestInstancePropertiesResp, this.HandleResponse },
                 { (Int32)BasilMessage.BasilMessageOps.CloseSessionResp, this.HandleResponse },
