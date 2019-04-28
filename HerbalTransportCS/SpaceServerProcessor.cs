@@ -48,7 +48,6 @@ namespace org.herbal3d.transport {
         //    processor for the defined message types.
 
         private BasilMessage.BasilMessage WrapOpenSession(BasilMessage.BasilMessage pReq) {
-            _context.Log.DebugFormat("[SpaceServerProcessor] WrapOpenSession");
             BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage() {
                 Op = (Int32)BasilMessage.BasilMessageOps.OpenSessionResp
             };

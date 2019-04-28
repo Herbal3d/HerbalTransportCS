@@ -38,7 +38,7 @@ namespace org.herbal3d.transport {
 
         // Send a message and expect a RPC type response.
         public async Task<BasilMessage.BasilMessage> SendAndAwaitResponse(BasilMessage.BasilMessage pReq) {
-            _context.Log.DebugFormat("{0} SendAndAwaitResponse", _logHeader);
+            // _context.Log.DebugFormat("{0} SendAndAwaitResponse", _logHeader);
             // Place structure in message that receiver will send back so we can match response.
             UInt32 thisSession = (UInt32)_randomNumbers.Next();
             pReq.Response = new BasilType.BResponseRequest() {
@@ -53,10 +53,10 @@ namespace org.herbal3d.transport {
                     timeRPCCreated = (ulong)DateTime.UtcNow.ToBinary(),
                 });
             }
-            _context.Log.DebugFormat("{0} SendAndAwaitResponse: Sending op={1}", _logHeader, pReq.Op);
+            // _context.Log.DebugFormat("{0} SendAndAwaitResponse: Sending op={1}", _logHeader, pReq.Op);
             Connection.Send(pReq);
             BasilMessage.BasilMessage resp = await tcs.Task;
-            _context.Log.DebugFormat("{0} SendAndAwaitResponse: Response op={1}", _logHeader, resp.Op);
+            // _context.Log.DebugFormat("{0} SendAndAwaitResponse: Response op={1}", _logHeader, resp.Op);
             if (resp.Exception != null) {
                 throw new BasilException(resp.Exception.Reason, new Dictionary<string,string>(resp.Exception.Hints));
             }
