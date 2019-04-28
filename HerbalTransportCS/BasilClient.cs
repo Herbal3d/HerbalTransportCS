@@ -136,6 +136,19 @@ namespace org.herbal3d.transport {
                 Exception = resp.Exception
             };
         }
+        public void UpdateInstancePosition(
+                        BasilType.AccessAuthorization pAuth,
+                        BasilType.InstanceIdentifier pId,
+                        BasilType.InstancePositionInfo pInstancePositionInfo) {
+            var req = new BasilMessage.BasilMessage {
+                Op = (Int32)BasilMessage.BasilMessageOps.UpdateInstancePositionReq,
+                Auth = pAuth,
+                InstanceId = pId,
+                Pos = pInstancePositionInfo
+            };
+            // Send and don't expect a response
+            Connection.BasilClientProcessor.SendMessage(req, null);
+        }
         public async Task<Basil.RequestObjectPropertiesResp> RequestObjectPropertiesAsync(
                         BasilType.AccessAuthorization pAuth,
                         BasilType.ObjectIdentifier pId,
