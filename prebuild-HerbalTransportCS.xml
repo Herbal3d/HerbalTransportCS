@@ -14,26 +14,17 @@
 
       <ReferencePath>../../../bin/</ReferencePath>
       <Reference name="System"/>
-      <Reference name="System.Data"/>
-      <Reference name="System.Data.DataSetExtensions"/>
-      <Reference name="System.Drawing"/>
-      <Reference name="System.Net.Http"/>
+      <Reference name="System.IO"/>
+      <Reference name="System.Linq"/>
+      <Reference name="System.Text"/>
+      <Reference name="System.Collections.Generic"/>
+      <Reference name="System.Collections.Concurrent"/>
+      <Reference name="System.Threading"/>
+      <Reference name="System.Threading.Tasks"/>
       <Reference name="System.Reflection"/>
-      <Reference name="System.XML"/>
+      <Reference name="System.Security.Cryptography.X509Certificates"/>
+
       <Reference name="Mono.Addins"/>
-
-      <Reference name="OpenMetaverse"/>
-      <Reference name="OpenMetaverseTypes"/>
-      <Reference name="OpenMetaverse.StructuredData"/>
-      <Reference name="OpenMetaverse.Rendering.Meshmerizer"/>
-
-      <Reference name="PrimMesher"/>
-
-      <Reference name="OpenSim.Framework"/>
-      <Reference name="OpenSim.Region.CoreModules"/>
-      <Reference name="OpenSim.Region.Framework"/>
-      <Reference name="OpenSim.Region.PhysicsModules.SharedBase"/>
-      <Reference name="OpenSim.Services.Interfaces"/>
 
       <Reference name="Herbal3d.CommonEntitiesUtil"/>
 
