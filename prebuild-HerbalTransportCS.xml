@@ -16,8 +16,6 @@
       <Reference name="System"/>
       <Reference name="System.IO"/>
       <Reference name="System.Linq"/>
-      <Reference name="System.Text"/>
-      <Reference name="System.Collections.Generic"/>
       <Reference name="System.Collections.Concurrent"/>
       <Reference name="System.Threading"/>
       <Reference name="System.Threading.Tasks"/>
