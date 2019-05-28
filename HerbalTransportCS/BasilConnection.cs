@@ -22,11 +22,11 @@ using BasilMessage = org.herbal3d.basil.protocol.Message;
 namespace org.herbal3d.transport {
     // A connection to a SpaceServer from a Basil Viewer.
     // Accept the OpenConnection from client then start the processing of messages.
-    public class BasilConnection  : IDisposable {
+    public class BasilConnection  : IMsgReceiver, IDisposable {
         private static readonly string _logHeader = "[BasilConnection]";
 
         // Public connections to the outside world: transport connection and calls to server
-        public TransportConnection Transport;
+        public ITransportConnection Transport;
 
         // Mapping of BasilMessage op's to and from code to string operation name
         public Dictionary<Int32, String> BasilMessageNameByOp = new Dictionary<int, string>();
@@ -62,7 +62,7 @@ namespace org.herbal3d.transport {
 
         // A socket connection has been made to a Basil Server.
         // Initialize message receivers and senders.
-        public BasilConnection(TransportConnection pConnection, TransportContext pContext) {
+        public BasilConnection(ITransportConnection pConnection, TransportContext pContext) {
             Transport = pConnection;
             _context = pContext;
 
@@ -101,12 +101,14 @@ namespace org.herbal3d.transport {
         }
 
         // This process shouldn't be receiving text message over the WebSocket
-        public void Receive(string pMsg) {
+        // IMsgReceiver.Receive(string pMsg)
+        public override void Receive(string pMsg) {
             _context.Log.ErrorFormat("{0} Receive: received a text message: {1}", _logHeader, pMsg);
         }
 
         // Received a binary message. Find the processor and execute it.
-        public void Receive(byte[] pMsg) {
+        // IMsgReceiver.Receive(byte[] pMsg)
+        public override void Receive(byte[] pMsg) {
             BasilMessage.BasilMessage rcvdMsg = BasilMessage.BasilMessage.Parser.ParseFrom(pMsg);
             if (_MsgProcessors.ContainsKey(rcvdMsg.Op)) {
                 try {
@@ -131,8 +133,8 @@ namespace org.herbal3d.transport {
             Transport.Send(pMsg.ToByteArray());
         }
 
-        // 
-        public void AbortConnection() {
+        // IMsgReceiver.AbortConnection()
+        public override void AbortConnection() {
         }
 
         // Loop over the Protobuf op enum and build a name to op and an op to name map.

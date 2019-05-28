@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>org.herbal3d.transport</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
