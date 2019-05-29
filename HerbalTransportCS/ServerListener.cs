@@ -26,7 +26,7 @@ using org.herbal3d.cs.CommonEntitiesUtil;
 namespace org.herbal3d.transport {
 
     public class TransportContext {
-        public IParameters Params;
+        public ParamBlock Params;
         public BLogger Log;
         public CancellationTokenSource CancellationSource;
         public CancellationToken Cancellation;
@@ -46,9 +46,19 @@ namespace org.herbal3d.transport {
         private Task _SocketListenerTask;
 
         // In pParams, expects: ConnectionURL, IsSecure, SecureConnectionURL, DisableNaglesAlgorithm
-        public ServerListener(IParameters pParams, BLogger pLog) {
+        public ServerListener(ParamBlock pParams, BLogger pLog) {
+            // Complete the passed params with configuration values and required defaults
+            ParamBlock completeParams = new ParamBlock(null, pParams,
+                    new ParamBlock(new Dictionary<string, object>() {
+                        { "IsSecure", false },
+                        { "ConnectionURL", "" },        // null or empty means no WS connection
+                        { "SecureConnectionURL", "ws://localhost:9999" },
+                        { "SocketConnectionURL", "" },  // null or empty means no socket connection
+                        { "DisableNaglesAlgorithm", true }
+                    })
+            );
             _context = new TransportContext() {
-                Params = pParams,
+                Params = completeParams,
                 Log = pLog
             };
             _context.Log.DebugFormat("{0} Initialization", _logHeader);
@@ -58,8 +68,12 @@ namespace org.herbal3d.transport {
             _context.Log.DebugFormat("{0} Start", _logHeader);
             _context.CancellationSource = pCanceller;
             _context.Cancellation = pCanceller.Token;
-            _WSListenerTask = StartWSListener();
-            // _SocketListenerTask = StartSocketListener();
+            if (!String.IsNullOrEmpty(_context.Params.P<string>("ConnectionURL"))) {
+                _WSListenerTask = StartWSListener();
+            }
+            if (!String.IsNullOrEmpty(_context.Params.P<string>("SocketConnectionURL"))) {
+                _SocketListenerTask = StartSocketListener();
+            }
         }
 
         public void Cancel() {
@@ -123,8 +137,9 @@ namespace org.herbal3d.transport {
                         _context.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
                         SetupServerBasilConnection(new TransportWS(socket, _context));
                     });
+                    // wait around in this thread until time to stop and release the server
                     while (!_context.Cancellation.IsCancellationRequested) {
-                        Task.Delay(100).Wait();
+                        Task.Delay(250).Wait();
                     }
                 }
                 _context.Log.DebugFormat("{0} Exiting server listen task", _logHeader);
@@ -162,6 +177,7 @@ namespace org.herbal3d.transport {
 
         // A reset event used to lock and serialize the socket accepts
         private ManualResetEvent acceptDone = new ManualResetEvent(false);
+        // Start the listener for the socket connection
         private Task StartSocketListener() {
             return Task.Run(() => {
                 // Establish the local endpoint for the socket.  
@@ -187,6 +203,8 @@ namespace org.herbal3d.transport {
             }, _context.Cancellation);
         }
 
+        // Someone has conneted to our socket.
+        // Create the SpaceServer and Basil talkers for the connection
         private void SocketAcceptCallback(IAsyncResult pAR) {
             acceptDone.Set();
             // Get the socket that handles the client request.  
