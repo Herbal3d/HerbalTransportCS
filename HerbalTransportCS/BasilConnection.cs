@@ -39,14 +39,13 @@ namespace org.herbal3d.transport {
         public delegate BasilMessage.BasilMessage ProcessMessage(BasilMessage.BasilMessage pMsg);
         public class Processors : Dictionary<Int32, ProcessMessage> { };
         // The processors for received op codes. Added to by the *Processor classes.
-        private Processors _MsgProcessors = new Processors();
+        private readonly Processors _MsgProcessors = new Processors();
 
         // Handles to the various message processors. Held on to for later disposal.
         public AliveCheckProcessor AliveCheckProcessor;
         public SpaceServerProcessor SpaceServiceProcessor;
         public BasilClientProcessor BasilClientProcessor;
-
-        TransportContext _context; // Global constants
+        readonly TransportContext _context; // Global constants
 
         // Per Basil connection RPC information.
         // One is kept for each outstanding RPC request. A later response will find

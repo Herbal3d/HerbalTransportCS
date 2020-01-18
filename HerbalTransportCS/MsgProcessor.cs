@@ -26,7 +26,7 @@ namespace org.herbal3d.transport {
 
         private static readonly string _logHeader = "[MsgProcessor]";
 
-        private Random _randomNumbers = new Random();
+        private readonly Random _randomNumbers = new Random();
         protected readonly TransportContext _context;
 
         public  BasilConnection Connection;

@@ -22,7 +22,7 @@ namespace org.herbal3d.transport {
     public class TransportWS : ITransportConnection {
         private static readonly string _logHeader = "[TransportWS]";
 
-        private IWebSocketConnection _connection = null;
+        private readonly IWebSocketConnection _connection = null;
         public readonly string Id;
 
         public TransportWS(IWebSocketConnection pConnection, TransportContext pContext)
