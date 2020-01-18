@@ -31,6 +31,7 @@
 
       <Reference name="Fleck"/>
       <Reference name="Google.Protobuf"/>
+      <Reference name="Newtonsoft.Json"/>
 
       <Files>
         <Match pattern="*.cs" recurse="true">
