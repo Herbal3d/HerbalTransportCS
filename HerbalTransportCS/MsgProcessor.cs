@@ -71,59 +71,52 @@ namespace org.herbal3d.transport {
             // string responseMsgName = _basilConnection.BasilMessageNameByOp[pResponseMsg.Op];
             // BasilTest.log.DebugFormat("{0} SendResponse: {1}", _logHeader, responseMsgName);
 
-            BasilMessage.BasilMessage msg = pResponseMsg;
-            if (pReqMsg != null && pReqMsg.Response != null) {
-                msg.Response = pReqMsg.Response;
+            if (pReqMsg != null && pReqMsg.ResponseCode != 0) {
+                pResponseMsg.ResponseCode = pReqMsg.ResponseCode;
             }
-            Connection.Send(msg);
+            Connection.Send(pResponseMsg);
         }
 
         // Given a request messsage and a partial response message, add the response tagging formation
         //    to the response so the sender of the request can match the messages.
         public static void MakeMessageAResponse(ref BasilMessage.BasilMessage pResponseMsg,
                     BasilMessage.BasilMessage pRequestMsg) {
-            if (pRequestMsg != null && pRequestMsg.Response != null) {
-                pResponseMsg.Response = pRequestMsg.Response;
+            if (pRequestMsg != null && pRequestMsg.ResponseCode != 0) {
+                pResponseMsg.ResponseCode = pRequestMsg.ResponseCode;
             }
         }
 
         // Received a response type message.
         // Find the matching RPC call info and call the process waiting for the response.
         protected BasilMessage.BasilMessage HandleResponse(BasilMessage.BasilMessage pResponseMsg) {
-            if (pResponseMsg.Response != null) {
-                if (pResponseMsg.Response.ResponseSession != 0) {
-                    // Look up the session this response corresponds to
-                    UInt32 sessionIndex = pResponseMsg.Response.ResponseSession;
-                    BasilConnection.SentRPC session;
-                    TaskCompletionSource<BasilMessage.BasilMessage> responseTask = null;
-                    lock (Connection.OutstandingRPC) {
-                        if (Connection.OutstandingRPC.ContainsKey(sessionIndex)) {
-                            session = (BasilConnection.SentRPC)Connection.OutstandingRPC[sessionIndex];
-                            Connection.OutstandingRPC.Remove(sessionIndex);
-                            responseTask = session.taskCompletion;
-                        }
-                        else {
-                            _context.Log.ErrorFormat("{0} missing RCP response key: {1}", _logHeader, sessionIndex);
-                        }
+            if (pResponseMsg.ResponseCode != 0) {
+                // Look up the session this response corresponds to
+                UInt32 sessionIndex = pResponseMsg.ResponseCode;
+                BasilConnection.SentRPC session;
+                TaskCompletionSource<BasilMessage.BasilMessage> responseTask = null;
+                lock (Connection.OutstandingRPC) {
+                    if (Connection.OutstandingRPC.ContainsKey(sessionIndex)) {
+                        session = (BasilConnection.SentRPC)Connection.OutstandingRPC[sessionIndex];
+                        Connection.OutstandingRPC.Remove(sessionIndex);
+                        responseTask = session.taskCompletion;
                     }
-                    if (responseTask != null) {
-                        try {
-                            // Setting the result will start up the process waiting on the task
-                            responseTask.SetResult(pResponseMsg);
-                        }
-                        catch (Exception e) {
-                            _context.Log.ErrorFormat("{0} Exception processing message: {1}",
-                                            _logHeader, e);
-                        }
+                    else {
+                        _context.Log.ErrorFormat("{0} missing RCP response key: {1}", _logHeader, sessionIndex);
                     }
                 }
-                else {
-                    _context.Log.ErrorFormat("{0} ResponseReq.ResponseSession missing. Type={1}",
-                                    _logHeader, Connection.BasilMessageNameByOp[pResponseMsg.Op]);
+                if (responseTask != null) {
+                    try {
+                        // Setting the result will start up the process waiting on the task
+                        responseTask.SetResult(pResponseMsg);
+                    }
+                    catch (Exception e) {
+                        _context.Log.ErrorFormat("{0} Exception processing message: {1}",
+                                        _logHeader, e);
+                    }
                 }
             }
             else {
-                _context.Log.ErrorFormat("{0} Response without ResponseReq. Type={1}",
+                _context.Log.ErrorFormat("{0} ResponseReq.ResponseSession missing. Type={1}",
                                 _logHeader, Connection.BasilMessageNameByOp[pResponseMsg.Op]);
             }
             return null;    // responses don't have a response

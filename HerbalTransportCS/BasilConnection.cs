@@ -29,22 +29,21 @@ namespace org.herbal3d.transport {
         public ITransportConnection Transport;
 
         // Mapping of BasilMessage op's to and from code to string operation name
-        public Dictionary<Int32, String> BasilMessageNameByOp = new Dictionary<int, string>();
-        public Dictionary<string, Int32> BasilMessageOpByName = new Dictionary<string, int>();
+        public Dictionary<UInt32, String> BasilMessageNameByOp = new Dictionary<uint, string>();
+        public Dictionary<string, UInt32> BasilMessageOpByName = new Dictionary<string, uint>();
 
         // The registered processors for received operation codes.
         // Register a ProcessMessage routine for each possible message 'op' received.
         //    The ProcessMessage routine does the operation and then returns a response
         //    message or null if no response.
         public delegate BasilMessage.BasilMessage ProcessMessage(BasilMessage.BasilMessage pMsg);
-        public class Processors : Dictionary<Int32, ProcessMessage> { };
+        public class Processors : Dictionary<UInt32, ProcessMessage> { };
         // The processors for received op codes. Added to by the *Processor classes.
         private readonly Processors _MsgProcessors = new Processors();
 
         // Handles to the various message processors. Held on to for later disposal.
-        public AliveCheckProcessor AliveCheckProcessor;
         public SpaceServerProcessor SpaceServiceProcessor;
-        public BasilClientProcessor BasilClientProcessor;
+        public BasilComm BasilClientProcessor;
         readonly TransportContext _context; // Global constants
 
         // Per Basil connection RPC information.
@@ -69,9 +68,8 @@ namespace org.herbal3d.transport {
             this.BuildBasilMessageOps();
 
             // Processors for received messages
-            AliveCheckProcessor = new AliveCheckProcessor(this, _context);
             SpaceServiceProcessor = new SpaceServerProcessor(this, _context);
-            BasilClientProcessor = new BasilClientProcessor(this, _context);
+            BasilClientProcessor = new BasilComm(this, _context);
         }
 
         public void Dispose() {
@@ -80,7 +78,6 @@ namespace org.herbal3d.transport {
                 Transport = null;
                 _MsgProcessors.Clear();
                 OutstandingRPC.Clear();
-                AliveCheckProcessor = null;
                 SpaceServiceProcessor = null;
                 BasilClientProcessor = null;
             }
@@ -94,7 +91,7 @@ namespace org.herbal3d.transport {
             }
         }
 
-        public void ReplaceMessageProcessor(int pOpCode, ProcessMessage pProcessor) {
+        public void ReplaceMessageProcessor(uint pOpCode, ProcessMessage pProcessor) {
             _MsgProcessors.Remove(pOpCode);
             _MsgProcessors.Add(pOpCode, pProcessor);
         }
@@ -141,8 +138,8 @@ namespace org.herbal3d.transport {
             Type enumType = typeof(BasilMessage.BasilMessageOps);
             foreach (BasilMessage.BasilMessageOps op in (BasilMessage.BasilMessageOps[])Enum.GetValues(enumType)) {
                 string opName = Enum.GetName(enumType, op);
-                this.BasilMessageOpByName.Add(opName, (Int32)op);
-                this.BasilMessageNameByOp.Add((Int32)op, opName);
+                this.BasilMessageOpByName.Add(opName, (UInt32)op);
+                this.BasilMessageNameByOp.Add((UInt32)op, opName);
             }
         }
     }
