@@ -7,12 +7,13 @@
 
   <ItemGroup>
     <PackageReference Include="Fleck" Version="1.1.0" />
-    <PackageReference Include="Google.Protobuf" Version="3.8.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Google.Protobuf" Version="3.11.4" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\HerbalCommonEntitiesCS\CommonEntitiesUtil\Herbal3d.CommonEntitiesUtil.csproj" />
+    <ProjectReference Include="..\..\OSAuthModule\OSAuth\Herbal3d.OSAuth.csproj" />
   </ItemGroup>
 
 </Project>

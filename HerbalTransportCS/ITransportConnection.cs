@@ -39,7 +39,7 @@ namespace org.herbal3d.transport {
         protected BlockingCollection<byte[]> _receiveQueue;
         protected BlockingCollection<byte[]> _sendQueue;
 
-        public IMsgReceiver MsgHandler;
+        public ITransportMsgReceiver MsgHandler;
 
         public ITransportConnection(TransportContext pContext) {
             _context = pContext;

@@ -39,7 +39,7 @@ namespace org.herbal3d.transport {
         public event Action<BasilConnection> OnBasilConnect;
         public event Action<BasilConnection> OnDisconnect;
 
-        public TransportContext _context;
+        public TransportContext Context;
 
         private List<ITransportConnection> _transports = new List<ITransportConnection>();
         private Task _WSListenerTask;
@@ -57,31 +57,31 @@ namespace org.herbal3d.transport {
                         { "DisableNaglesAlgorithm", true }
                     })
             );
-            _context = new TransportContext() {
+            Context = new TransportContext() {
                 Params = completeParams,
                 Log = pLog
             };
-            _context.Log.DebugFormat("{0} Initialization", _logHeader);
+            Context.Log.DebugFormat("{0} Initialization", _logHeader);
         }
 
         public void Start(CancellationTokenSource pCanceller) {
-            _context.Log.DebugFormat("{0} Start", _logHeader);
-            _context.CancellationSource = pCanceller;
-            _context.Cancellation = pCanceller.Token;
-            if (!String.IsNullOrEmpty(_context.Params.P<string>("ConnectionURL"))) {
+            Context.Log.DebugFormat("{0} Start", _logHeader);
+            Context.CancellationSource = pCanceller;
+            Context.Cancellation = pCanceller.Token;
+            if (!String.IsNullOrEmpty(Context.Params.P<string>("ConnectionURL"))) {
                 _WSListenerTask = StartWSListener();
             }
-            if (!String.IsNullOrEmpty(_context.Params.P<string>("SocketConnectionURL"))) {
+            if (!String.IsNullOrEmpty(Context.Params.P<string>("SocketConnectionURL"))) {
                 _SocketListenerTask = StartSocketListener();
             }
         }
 
         public void Cancel() {
-            _context.Log.DebugFormat("{0} Cancel", _logHeader);
-            if (_context != null && _context.CancellationSource != null) {
-                _context.CancellationSource.Cancel();
+            Context.Log.DebugFormat("{0} Cancel", _logHeader);
+            if (Context != null && Context.CancellationSource != null) {
+                Context.CancellationSource.Cancel();
                 // _context.CancellationSource.Dispose();
-                _context.CancellationSource = null;
+                Context.CancellationSource = null;
             }
         }
 
@@ -111,68 +111,66 @@ namespace org.herbal3d.transport {
 
                 // For debugging, it is possible to set up a non-encrypted connection
                 WebSocketServer server = null;
-                if (_context.Params.P<bool>("IsSecure")) {
-                    string connectionURL = _context.Params.P<string>("SecureConnectionURL");
-                    _context.Log.DebugFormat("{0} Creating secure server on {1}", _logHeader, connectionURL);
+                if (Context.Params.P<bool>("IsSecure")) {
+                    string connectionURL = Context.Params.P<string>("SecureConnectionURL");
+                    Context.Log.DebugFormat("{0} Creating secure server on {1}", _logHeader, connectionURL);
                     server = new WebSocketServer(connectionURL) {
-                        Certificate = new X509Certificate2(_context.Params.P<string>("Certificate")),
+                        Certificate = new X509Certificate2(Context.Params.P<string>("Certificate")),
                         EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
                     };
                 }
                 else {
-                    string connectionURL = _context.Params.P<string>("ConnectionURL");
-                    _context.Log.DebugFormat("{0} Creating insecure server on {1}", _logHeader, connectionURL);
+                    string connectionURL = Context.Params.P<string>("ConnectionURL");
+                    Context.Log.DebugFormat("{0} Creating insecure server on {1}", _logHeader, connectionURL);
                     server = new WebSocketServer(connectionURL);
                 }
 
                 // Disable the ACK delay for better responsiveness
-                if (_context.Params.P<bool>("DisableNaglesAlgorithm")) {
-                    _context.Log.DebugFormat("{0} Disabling Nagles algorightm", _logHeader);
+                if (Context.Params.P<bool>("DisableNaglesAlgorithm")) {
+                    Context.Log.DebugFormat("{0} Disabling Nagles algorightm", _logHeader);
                     server.ListenerSocket.NoDelay = true;
                 }
 
                 // Loop around waiting for connections
                 using (server) {
                     server.Start(socket => {
-                        _context.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
-                        SetupServerBasilConnection(new TransportWS(socket, _context));
+                        Context.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
+                        SetupServerBasilConnection(new TransportWS(socket, Context));
                     });
                     // wait around in this thread until time to stop and release the server
-                    while (!_context.Cancellation.IsCancellationRequested) {
+                    while (!Context.Cancellation.IsCancellationRequested) {
                         Task.Delay(250).Wait();
                     }
                 }
-                _context.Log.DebugFormat("{0} Exiting server listen task", _logHeader);
-            }, _context.Cancellation);
+                Context.Log.DebugFormat("{0} Exiting server listen task", _logHeader);
+            }, Context.Cancellation);
         }
 
         // Given an accepted connection from a client, async setup the processing
         //    routines and call all the callbacks.
         private void SetupServerBasilConnection(ITransportConnection pTransport) {
-            Task.Run(() => {
-                lock (_transports) {
-                    // When someone connects, set up BasilMessage processing
-                    pTransport.OnConnect += transport => {
-                        _context.Log.DebugFormat("{0} OnConnect event", _logHeader);
-                        var basilConnection = new BasilConnection(pTransport, _context);
-                        pTransport.MsgHandler = basilConnection;
-                        TriggerConnect(transport);
-                        TriggerBasilConnect(basilConnection);
-                    };
-                    pTransport.OnDisconnect += transport => {
-                        _context.Log.DebugFormat("{0} OnDisconnect event", _logHeader);
-                        lock (_transports) {
-                            _context.Log.InfoFormat("{0} client disconnected", _logHeader);
-                            _transports.Remove(transport);
-                        }
-                        TriggerDisconnect(pTransport.MsgHandler as BasilConnection);
-                        pTransport.MsgHandler = null;
-                    };
-
-                    _transports.Add(pTransport);
-                    pTransport.Start();
+            lock (_transports) {
+                // When someone connects, set up BasilMessage processing
+                pTransport.OnConnect += transport => {
+                    Context.Log.DebugFormat("{0} OnConnect event", _logHeader);
+                    var basilConnection = new BasilConnection(pTransport, Context);
+                    pTransport.MsgHandler = basilConnection;
+                    TriggerConnect(transport);
+                    TriggerBasilConnect(basilConnection);
                 };
-            });
+                pTransport.OnDisconnect += transport => {
+                    Context.Log.DebugFormat("{0} OnDisconnect event", _logHeader);
+                    lock (_transports) {
+                        Context.Log.InfoFormat("{0} client disconnected", _logHeader);
+                        _transports.Remove(transport);
+                    }
+                    TriggerDisconnect(pTransport.MsgHandler as BasilConnection);
+                    pTransport.MsgHandler = null;
+                };
+
+                _transports.Add(pTransport);
+                pTransport.Start();
+            };
         }
 
         // A reset event used to lock and serialize the socket accepts
@@ -198,9 +196,9 @@ namespace org.herbal3d.transport {
                     }
                 }
                 catch (Exception e) {
-                    _context.Log.ErrorFormat("{0} StartSocketListener exception: {1}", _logHeader, e);
+                    Context.Log.ErrorFormat("{0} StartSocketListener exception: {1}", _logHeader, e);
                 }
-            }, _context.Cancellation);
+            }, Context.Cancellation);
         }
 
         // Someone has conneted to our socket.
@@ -211,7 +209,7 @@ namespace org.herbal3d.transport {
             Socket listener = (Socket)pAR.AsyncState;
             Socket clientSocket = listener.EndAccept(pAR);
 
-            SetupServerBasilConnection(new TransportSocket(clientSocket, _context));
+            SetupServerBasilConnection(new TransportSocket(clientSocket, Context));
         }
 
         // The WebSocket connection is connected. Tell the listeners.
@@ -243,6 +241,5 @@ namespace org.herbal3d.transport {
                 }
             }
         }
-
     }
 }

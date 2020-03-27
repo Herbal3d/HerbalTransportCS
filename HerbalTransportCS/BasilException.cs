@@ -19,21 +19,21 @@ namespace org.herbal3d.transport {
         private readonly string _message;
         private readonly Dictionary<string, string> _reasonHints;
 
-        public BasilException(string reason) {
+        public BasilException(string reason) : base(reason) {
             _message = reason;
             _reasonHints = null;
         }
 
-        public BasilException(string reason, Dictionary<string, string> reasonHints) {
+        public BasilException(string reason, IDictionary<string, string> reasonHints) : base(reason) {
             _message = reason;
-            _reasonHints = reasonHints;
+            foreach (var kvp in reasonHints) {
+                _reasonHints.Add(kvp.Key, kvp.Value);
+            }
         }
-
-        public override string Message => _message;
 
         public override string ToString() {
             StringBuilder buff = new StringBuilder();
-            buff.Append(_message);
+            buff.Append(base.ToString());
             if (_reasonHints != null) {
                 foreach (KeyValuePair<string,string> kvp in _reasonHints) {
                     buff.Append(String.Format(" {0}:{1}", kvp.Key, kvp.Value));

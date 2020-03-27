@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2020 Robert Adams
+// Copyright (c) 2020 Robert Adams
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,254 +11,199 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using BasilMessage = org.herbal3d.basil.protocol.Message;
-using BasilType = org.herbal3d.basil.protocol.BasilType;
+using BM = org.herbal3d.basil.protocol.Message;
+using BT = org.herbal3d.basil.protocol.BasilType;
+
+using org.herbal3d.OSAuth;
 
 namespace org.herbal3d.transport {
-    public class BasilComm : MsgProcessor {
+    public class BasilComm {
 
-        // Must be set by eventually created SpaceServer for it to receive messages
-        public ISpaceServer SpaceServerMsgHandler;
+        public BasilConnection Connection;
+        public OSAuthToken ClientAuth;
 
-        public BasilComm(BasilConnection pConnection, TransportContext pContext) : base(pConnection, pContext) {
+        public BasilComm(BasilConnection pConnection) {
+
+            Connection = pConnection;
 
             // Add processors for message ops
             BasilConnection.Processors processors = new BasilConnection.Processors {
-                { (Int32)BasilMessage.BasilMessageOps.CreateItemReq, this.ProcCreateItemReq },
-                { (Int32)BasilMessage.BasilMessageOps.CreateItemResp, this.HandleResponse },
-                { (Int32)BasilMessage.BasilMessageOps.DeleteItemReq, this.ProcDeleteItemReq },
-                { (Int32)BasilMessage.BasilMessageOps.DeleteItemResp, this.HandleResponse },
-                { (Int32)BasilMessage.BasilMessageOps.AddAbilityReq, this.ProcAddAbilityReq },
-                { (Int32)BasilMessage.BasilMessageOps.AddAbilityResp, this.HandleResponse },
-                { (Int32)BasilMessage.BasilMessageOps.RemoveAbilityReq, this.ProcRemoveAbilityReq },
-                { (Int32)BasilMessage.BasilMessageOps.RemoveAbilityResp, this.HandleResponse },
-                { (Int32)BasilMessage.BasilMessageOps.RequestPropertiesReq, this.ProcRequestPropertiesReq },
-                { (Int32)BasilMessage.BasilMessageOps.RequestPropertiesResp, this.HandleResponse },
-                { (Int32)BasilMessage.BasilMessageOps.UpdatePropertiesReq, this.ProcUpdatePropertiesReq },
-                { (Int32)BasilMessage.BasilMessageOps.UpdatePropertiesResp, this.HandleResponse },
-                { (Int32)BasilMessage.BasilMessageOps.OpenSessionReq, this.ProcOpenSessionReq },
-                { (Int32)BasilMessage.BasilMessageOps.OpenSessionResp, this.HandleResponse },
-                { (Int32)BasilMessage.BasilMessageOps.CloseSessionReq, this.ProcCloseSessionReq },
-                { (Int32)BasilMessage.BasilMessageOps.CloseSessionResp, this.HandleResponse },
-                { (Int32)BasilMessage.BasilMessageOps.MakeConnectionReq, this.ProcMakeConnectionReq },
-                { (Int32)BasilMessage.BasilMessageOps.MakeConnectionResp, this.HandleResponse },
-                { (Int32)BasilMessage.BasilMessageOps.AliveCheckReq, this.ProcAliveCheckReq },
-                { (Int32)BasilMessage.BasilMessageOps.AliveCheckResp, this.HandleResponse }
+                { (Int32)BM.BasilMessageOps.CreateItemReq, this.ProcCreateItemReq },
+                { (Int32)BM.BasilMessageOps.CreateItemResp, Connection.HandleResponse },
+                { (Int32)BM.BasilMessageOps.DeleteItemReq, this.ProcDeleteItemReq },
+                { (Int32)BM.BasilMessageOps.DeleteItemResp, Connection.HandleResponse },
+                { (Int32)BM.BasilMessageOps.AddAbilityReq, this.ProcAddAbilityReq },
+                { (Int32)BM.BasilMessageOps.AddAbilityResp, Connection.HandleResponse },
+                { (Int32)BM.BasilMessageOps.RemoveAbilityReq, this.ProcRemoveAbilityReq },
+                { (Int32)BM.BasilMessageOps.RemoveAbilityResp, Connection.HandleResponse },
+                { (Int32)BM.BasilMessageOps.RequestPropertiesReq, this.ProcRequestPropertiesReq },
+                { (Int32)BM.BasilMessageOps.RequestPropertiesResp, Connection.HandleResponse },
+                { (Int32)BM.BasilMessageOps.UpdatePropertiesReq, this.ProcUpdatePropertiesReq },
+                { (Int32)BM.BasilMessageOps.UpdatePropertiesResp, Connection.HandleResponse },
+                { (Int32)BM.BasilMessageOps.MakeConnectionReq, this.ProcMakeConnectionReq },
+                { (Int32)BM.BasilMessageOps.MakeConnectionResp, Connection.HandleResponse },
             };
             Connection.AddMessageProcessors(processors);
         }
 
-        public Task<BasilMessage.BasilMessage> CreateItemAsync(
-                        BasilType.Auth pAuth, BasilType.Props pProps, BasilType.Abilities pAbilities) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.CreateItemReq,
-                SessionAuth = pAuth.ToString()
+        public async Task<BT.Props> CreateItemAsync(BT.Props pProps, BT.AbilityList pAbilities) {
+            BM.BasilMessage req = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.CreateItemReq,
+                SessionAuth = ClientAuth.ToString()
             };
-            return this.SendAndAwaitResponse(ret);
+            AddPropsToIProps(pProps, ref req);
+            AddAbilitiesToAProps(pAbilities, ref req);
+            BM.BasilMessage resp = await Connection.SendAndAwaitResponse(req);
+            return ReturnExceptionOrIProps(resp, "CreateItem");
         }
-        private BasilMessage.BasilMessage ProcCreateItemReq(BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.CreateItemResp
+        private BM.BasilMessage ProcCreateItemReq(BM.BasilMessage pReq) {
+            BM.BasilMessage resp = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.CreateItemResp
             };
-            return ret;
+            return resp;
         }
-        public Task<BasilMessage.BasilMessage> DeleteItemAsync(
-                        BasilType.Auth pAuth, BasilType.ItemId pItem) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.DeleteItemReq,
-                SessionAuth = pAuth.ToString()
+        public async Task<BT.Props> DeleteItemAsync(BT.ItemId pItem) {
+            BM.BasilMessage req = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.DeleteItemReq,
+                SessionAuth = ClientAuth.ToString(),
+                ItemId = pItem.Id
             };
-            return this.SendAndAwaitResponse(ret);
+            BM.BasilMessage resp = await Connection.SendAndAwaitResponse(req);
+            return ReturnExceptionOrIProps(resp, "DeleteItem");
         }
-        private BasilMessage.BasilMessage ProcDeleteItemReq(BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.DeleteItemResp
+        private BM.BasilMessage ProcDeleteItemReq(BM.BasilMessage pReq) {
+            BM.BasilMessage resp = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.DeleteItemResp
             };
-            return ret;
+            return resp;
         }
-        public Task<BasilMessage.BasilMessage> AddAbilityAsync(
-                        BasilType.Auth pAuth, BasilType.ItemId pId, BasilType.Abilities pAbilities) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.AddAbilityReq,
-                SessionAuth = pAuth.ToString()
+        public async Task<BT.Props> AddAbilityAsync(BT.ItemId pId, BT.AbilityList pAbilities) {
+            BM.BasilMessage req = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.AddAbilityReq,
+                SessionAuth = ClientAuth.ToString(),
+                ItemId = pId.Id
             };
-            return this.SendAndAwaitResponse(ret);
+            AddAbilitiesToAProps(pAbilities, ref req);
+            BM.BasilMessage resp = await Connection.SendAndAwaitResponse(req);
+            return ReturnExceptionOrIProps(resp, "AddAbility");
         }
-        private BasilMessage.BasilMessage ProcAddAbilityReq(BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.AddAbilityResp
+        private BM.BasilMessage ProcAddAbilityReq(BM.BasilMessage pReq) {
+            BM.BasilMessage resp = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.AddAbilityResp
             };
-            return ret;
+            return resp;
         }
-        public Task<BasilMessage.BasilMessage> RemoveAbilityAsync(
-                        BasilType.Auth pAuth, BasilType.ItemId pId, BasilType.Abilities pAbilities) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.RemoveAbilityReq,
-                SessionAuth = pAuth.ToString()
+        public async Task<BT.Props> RemoveAbilityAsync( BT.ItemId pId, BT.AbilityList pAbilities) {
+            BM.BasilMessage req = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.RemoveAbilityReq,
+                SessionAuth = ClientAuth.ToString()
             };
-            return this.SendAndAwaitResponse(ret);
+            AddAbilitiesToAProps(pAbilities, ref req);
+            BM.BasilMessage resp = await Connection.SendAndAwaitResponse(req);
+            return ReturnExceptionOrIProps(resp, "RemoveAbility");
         }
-        private BasilMessage.BasilMessage ProcRemoveAbilityReq(BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.RemoveAbilityResp
+        private BM.BasilMessage ProcRemoveAbilityReq(BM.BasilMessage pReq) {
+            throw new NotImplementedException("BasilComm.ProcRequestPropertiesReq");
+            /*
+            BM.BasilMessage resp = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.RemoveAbilityResp
             };
-            return ret;
+            return resp;
+            */
         }
-        public Task<BasilMessage.BasilMessage> RequestPropertiesAsync(
-                        BasilType.Auth pAuth, BasilType.ItemId pId, BasilType.Props pProps) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.RequestPropertiesReq,
-                SessionAuth = pAuth.ToString()
+        public async Task<BT.Props> RequestPropertiesAsync(BT.ItemId pId, BT.Props pProps) {
+            BM.BasilMessage req = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.RequestPropertiesReq,
+                SessionAuth = ClientAuth.ToString()
             };
-            return this.SendAndAwaitResponse(ret);
+            AddPropsToIProps(pProps, ref req);
+            BM.BasilMessage resp = await Connection.SendAndAwaitResponse(req);
+            return ReturnExceptionOrIProps(resp, "RequestProperties");
         }
-        private BasilMessage.BasilMessage ProcRequestPropertiesReq(BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.RequestPropertiesResp
+        private BM.BasilMessage ProcRequestPropertiesReq(BM.BasilMessage pReq) {
+            throw new NotImplementedException("BasilComm.ProcRequestPropertiesReq");
+            /*
+            BM.BasilMessage resp = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.RequestPropertiesResp
             };
-            return ret;
+            return resp;
+            */
         }
-        public Task<BasilMessage.BasilMessage> UpdatePropertiesAsync(
-                        BasilType.Auth pAuth, BasilType.ItemId pId, BasilType.Props pProps) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.UpdatePropertiesReq,
-                SessionAuth = pAuth.ToString()
+        public async Task<BT.Props> UpdatePropertiesAsync(BT.ItemId pId, BT.Props pProps) {
+            BM.BasilMessage req = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.UpdatePropertiesReq,
+                SessionAuth = ClientAuth.ToString(),
+                ItemId = pId.Id
             };
-            return this.SendAndAwaitResponse(ret);
+            AddPropsToIProps(pProps, ref req);
+            BM.BasilMessage resp = await Connection.SendAndAwaitResponse(req);
+            return ReturnExceptionOrIProps(resp, "UpdateProperties");
         }
-        private BasilMessage.BasilMessage ProcUpdatePropertiesReq(BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.UpdatePropertiesResp
+        private BM.BasilMessage ProcUpdatePropertiesReq(BM.BasilMessage pReq) {
+            throw new NotImplementedException("BasilComm.ProcUpdatePropertiesReq");
+            /*
+            BM.BasilMessage resp = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.UpdatePropertiesResp
             };
-            return ret;
+            return resp;
+            */
         }
-        public Task<BasilMessage.BasilMessage> OpenSessionAsync(
-                        BasilType.Auth pAuth, BasilType.Props pProps) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.OpenSessionReq,
-                SessionAuth = pAuth.ToString()
+        public async Task<BT.Props> MakeConnectionAsync(BT.Props pProps) {
+            BM.BasilMessage req = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.MakeConnectionReq,
+                SessionAuth = ClientAuth.ToString()
             };
-            return this.SendAndAwaitResponse(ret);
+            BM.BasilMessage resp = await Connection.SendAndAwaitResponse(req);
+            return ReturnExceptionOrIProps(resp, "MakeConnection");
         }
-        private BasilMessage.BasilMessage ProcOpenSessionReq(BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.OpenSessionResp
+        private BM.BasilMessage ProcMakeConnectionReq(BM.BasilMessage pReq) {
+            throw new NotImplementedException("BasilComm.ProcMakeConnection");
+            /*
+            BM.BasilMessage resp = new BM.BasilMessage() {
+                Op = (uint)BM.BasilMessageOps.MakeConnectionResp
             };
+            return resp;
+            */
+        }
 
-            SpaceServer.OpenSessionReq ssReq = new SpaceServer.OpenSessionReq() {
-                Auth = pReq.Auth,
-            };
-            if (pReq.Properties != null && pReq.Properties.Count > 0) {
-                ssReq.Features.Add(pReq.Properties);
-            }
-            if (SpaceServerMsgHandler != null) {
-                SpaceServer.OpenSessionResp ssResp = SpaceServerMsgHandler.OpenSession(ssReq);
-                pResp.Exception = ssResp.Exception;
-                if (ssResp.Properties != null && ssResp.Properties.Count > 0) {
-                    pResp.Properties.Add(ssResp.Properties);
+        // Utility function to copy BT.Props into IProps in passed message
+        private void AddPropsToIProps(BT.Props pProps, ref BM.BasilMessage pMsg) {
+            if (pProps != null) {
+                foreach (var kvp in pProps) {
+                    pMsg.IProps.Add(kvp.Key, kvp.Value);
                 }
+            }
+        }
+        // Utility function that takes a response and build a Props structure
+        //    that contains either Exception information or the contents of IProps.
+        private BT.Props ReturnExceptionOrIProps(BM.BasilMessage pMsg, string pSource) {
+            BT.Props ret = new BT.Props();
+
+            if (!String.IsNullOrEmpty(pMsg.Exception)) {
+                throw new BasilException(pSource + ": " +pMsg.Exception, pMsg.ExceptionHints);
             }
             else {
-                pResp.Exception = new BasilType.BasilException() {
-                    Reason = "Connection not initialized"
-                };
-            }
-            MsgProcessor.MakeMessageAResponse(ref pResp, pReq);
-            return pResp;
-            return ret;
-        }
-        public Task<BasilMessage.BasilMessage> CloseSessionAsync(
-                        BasilType.Auth pAuth, BasilType.Props pProps) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.CloseSessionReq,
-                SessionAuth = pAuth.ToString()
-            };
-            return this.SendAndAwaitResponse(ret);
-        }
-        private BasilMessage.BasilMessage ProcCloseSessionReq(BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage pResp = new BasilMessage.BasilMessage() {
-                Op = (Int32)BasilMessage.BasilMessageOps.CloseSessionResp
-            };
-
-            SpaceServer.CloseSessionReq ssReq = new SpaceServer.CloseSessionReq() {
-                Auth = pReq.Auth
-            };
-            if (pReq.Properties != null && pReq.Properties.ContainsKey("Reason")) {
-                ssReq.Reason = pReq.Properties["Reason"];
-            }
-            if (SpaceServerMsgHandler != null) {
-                SpaceServer.CloseSessionResp ssResp = SpaceServerMsgHandler.CloseSession(ssReq);
-                pResp.Exception = ssResp.Exception;
-            }
-            else {
-                pResp.Exception = new BasilType.BasilException() {
-                    Reason = "Connection not initialized"
-                };
-            }
-            MsgProcessor.MakeMessageAResponse(ref pResp, pReq);
-            return pResp;
-            return ret;
-        }
-        public Task<BasilMessage.BasilMessage> MakeConnectionAsync(
-                        BasilType.Auth pAuth, BasilType.Props pProps) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.MakeConnectionReq,
-                SessionAuth = pAuth.ToString()
-            };
-            return this.SendAndAwaitResponse(ret);
-        }
-        private BasilMessage.BasilMessage ProcMakeConnectionReq(BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.MakeConnectionResp
-            };
-            return ret;
-        }
-
-        public Task<BasilMessage.BasilMessage> AliveCheckAsync( BasilType.Auth pAuth) {
-            BasilMessage.BasilMessage req = MakeAliveCheckReq(pAuth);
-            return this.SendAndAwaitResponse(req);
-        }
-
-        // Send an AliveCheck request without expecting a response
-        public void AliveCheck(BasilType.Auth pAuth) {
-            BasilMessage.BasilMessage req = MakeAliveCheckReq(pAuth);
-            this.SendMessage(req, null);
-        }
-
-        static UInt64 _AliveSequenceNumber = 1;
-        private BasilMessage.BasilMessage MakeAliveCheckReq( BasilType.Auth pAuth) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                SessionAuth = pAuth.ToString()
-            };
-            ret.IProps.Add("time", DateTime.UtcNow.ToString());
-            ret.IProps.Add("sequenceNum", (_AliveSequenceNumber++).ToString());
-            return ret;
-        }
-
-        private BasilMessage.BasilMessage ProcAliveCheckReq( BasilMessage.BasilMessage pReq) {
-            BasilMessage.BasilMessage ret = new BasilMessage.BasilMessage() {
-                Op = (uint)BasilMessage.BasilMessageOps.AliveCheckResp
-            };
-            ret.IProps.Add("time", DateTime.UtcNow.ToString());
-            ret.IProps.Add("sequenceNum", (_AliveSequenceNumber++).ToString());
-            if (pReq.IProps != null) {
-                if (pReq.IProps.ContainsKey("time")) {
-                    ret.IProps.Add("timeReceived", (string)pReq.IProps["time"]);
-                }
-                else {
-                    ret.IProps.Add("timeReceived", "0");
-                }
-                if (pReq.IProps.ContainsKey("sequenceNum")) {
-                    ret.IProps.Add("sequenceNumReceived", (string)pReq.IProps["sequenceNum"]);
-                }
-                else {
-                    ret.IProps.Add("sequenceNumReceived", "0");
+                if (pMsg.IProps != null && pMsg.IProps.Count > 0) {
+                    ret.Add(pMsg.IProps);
                 }
             }
             return ret;
+        }
+        // Utility function that adds the ability ParamBlocks to the AProps collection
+        //     in the passed message.
+        private void AddAbilitiesToAProps(BT.AbilityList pAbilities, ref BM.BasilMessage pMsg) {
+            if (pAbilities != null && pAbilities.Count > 0) {
+                foreach (var abil in pAbilities) {
+                    BM.ParamBlock pBlock = new BM.ParamBlock();
+                    pBlock.Ability = abil.AbilityCode;
+                    abil.AddToProps(pBlock.Props);
+                    pMsg.AProps.Add(pBlock);
+                }
+            }
         }
     }
 }
