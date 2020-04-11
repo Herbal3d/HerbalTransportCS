@@ -14,6 +14,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 namespace org.herbal3d.basil.protocol.BasilType {
 
     public class ItemId {
@@ -148,7 +151,7 @@ namespace org.herbal3d.basil.protocol.BasilType {
         public static string VectorToString(double[] pVect) {
             string ret = null;
             if (pVect.Length >= 3) {
-                ret = String.Format("<{0},{1},{2}>", pVect[0], pVect[1], pVect[2]);
+                ret = String.Format("[{0},{1},{2}]", pVect[0], pVect[1], pVect[2]);
             }
             return ret;
         }
@@ -158,7 +161,7 @@ namespace org.herbal3d.basil.protocol.BasilType {
         public static string RotationToString(double[] pVect) {
             string ret = null;
             if (pVect.Length >= 4) {
-                ret = String.Format("<{0},{1},{2},{3}>", pVect[0], pVect[1], pVect[2], pVect[3]);
+                ret = String.Format("[{0},{1},{2},{3}]", pVect[0], pVect[1], pVect[2], pVect[3]);
             }
             return ret;
         }
@@ -168,7 +171,7 @@ namespace org.herbal3d.basil.protocol.BasilType {
         public static string AabbToString(double[] pVect) {
             string ret = null;
             if (pVect.Length >= 6) {
-                ret = String.Format("<{0},{1},{2}>,<{3},{4},{5}>",
+                ret = String.Format("[{0},{1},{2},{3},{4},{5}]",
                     pVect[0], pVect[1], pVect[2], pVect[3], pVect[4], pVect[5]);
             }
             return ret;
@@ -179,9 +182,11 @@ namespace org.herbal3d.basil.protocol.BasilType {
         private static double[] DoublesFromString(string pStr, int pLen) {
             double[] ret = null;
             try {
-                string[] pieces = pStr.Replace("<", "").Replace(">", "").Split(',');
-                if (pieces.Length == pLen) {
-                    ret = pieces.Select(nn => { return Double.Parse(nn); }).ToArray();
+                if (pStr.Trim().StartsWith("[")) {
+                    string[] pieces = pStr.Replace("[", "").Replace("]", "").Split(',');
+                    if (pieces.Length == pLen) {
+                        ret = pieces.Select(nn => { return Double.Parse(nn); }).ToArray();
+                    }
                 }
             }
             catch (Exception) {
