@@ -104,11 +104,11 @@ namespace org.herbal3d.transport {
                     timeRPCCreated = (ulong)DateTime.UtcNow.ToBinary(),
                 });
             }
-            // _context.Log.DebugFormat("{0} SendAndAwaitResponse: Sending op={1}", _logHeader, pReq.Op);
+            // Context.Log.DebugFormat("{0} SendAndAwaitResponse: Sending '{1}'", _logHeader, pReq);
             Send(pReq);
             BM.BasilMessage resp = await tcs.Task;
-            // _context.Log.DebugFormat("{0} SendAndAwaitResponse: Response op={1}", _logHeader, resp.Op);
-            if (resp.Exception != null) {
+            // Context.Log.DebugFormat("{0} SendAndAwaitResponse: Received '{1}'", _logHeader, resp);
+            if (! String.IsNullOrEmpty(resp.Exception)) {
                 throw new BasilException(resp.Exception, new Dictionary<string,string>(resp.ExceptionHints));
             }
             return resp;
@@ -227,7 +227,7 @@ namespace org.herbal3d.transport {
         }
 
         // Loop over the Protobuf op enum and build a name to op and an op to name map.
-        private static Object _buildLockObject = new object();
+        private readonly static Object _buildLockObject = new object();
         private static void BuildBasilMessageOps() {
             lock (BasilConnection._buildLockObject) {
                 if (BasilConnection.BasilMessageOpByName == null || BasilConnection.BasilMessageOpByName.Count == 0) {

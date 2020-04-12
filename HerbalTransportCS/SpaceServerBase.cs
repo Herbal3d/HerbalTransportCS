@@ -29,7 +29,7 @@ namespace org.herbal3d.transport {
     //     connects.
     public abstract class SpaceServerBase {
 
-        private static string _logHeader = "[SpaceServerBase]";
+        private static readonly string _logHeader = "[SpaceServerBase]";
 
         // Return a reference to the client communication instance for this SpaceServer
         public BasilConnection ClientConnection;    // Communication to Basil
@@ -133,14 +133,19 @@ namespace org.herbal3d.transport {
                 // END DEBUG DEBUG
 
                 // This connection gets a unique handle
-                string connectionKey = Guid.NewGuid().ToString();
+                string connectionKey = Util.RandomString(10);
 
                 // The client gives us a token that authenticates to all our requests to the client
                 OSAuthToken clientToken = OSAuthToken.FromString(pReq.SessionAuth);
 
                 if (VerifyClientAuthentication(clientToken)) {
                     // Create a key to uniquify this session
-                    SessionKey = Util.RandomString(10);
+                    // Use the version sent by the client if it is supplied
+                    SessionKey = null;
+                    pReq.IProps.TryGetValue("SessionKey", out SessionKey);
+                    if (String.IsNullOrEmpty(SessionKey)) {
+                        SessionKey = Util.RandomString(10);
+                    };
 
                     // The client should have given us some authorization for our requests to her.
                     // Collect auth information for accessing the client and build an OSAuthToken
@@ -165,8 +170,9 @@ namespace org.herbal3d.transport {
                     }
                 }
                 // Add a processor for the alive check messages
-                AliveChecker = new AliveCheck(Canceller, ClientConnection);
-                AliveChecker.ClientAuth = ClientAuth;
+                AliveChecker = new AliveCheck(Canceller, ClientConnection) {
+                    ClientAuth = ClientAuth
+                };
 
                 // The rest of the communication uses this per-user/per-session token
                 SessionAuth = new OSAuthToken() {

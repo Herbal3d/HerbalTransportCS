@@ -70,7 +70,7 @@ namespace org.herbal3d.transport {
             BM.BasilMessage req = new BM.BasilMessage() {
                 Op = (uint)BM.BasilMessageOps.DeleteItemReq,
                 SessionAuth = ClientAuth.ToString(),
-                ItemId = pItem.Id
+                ItemId = pItem.ToString()
             };
             BM.BasilMessage resp = await Connection.SendAndAwaitResponse(req);
             return ReturnExceptionOrIProps(resp, "DeleteItem");
@@ -85,7 +85,7 @@ namespace org.herbal3d.transport {
             BM.BasilMessage req = new BM.BasilMessage() {
                 Op = (uint)BM.BasilMessageOps.AddAbilityReq,
                 SessionAuth = ClientAuth.ToString(),
-                ItemId = pId.Id
+                ItemId = pId.ToString()
             };
             AddAbilitiesToAProps(pAbilities, ref req);
             BM.BasilMessage resp = await Connection.SendAndAwaitResponse(req);
@@ -100,6 +100,7 @@ namespace org.herbal3d.transport {
         public async Task<BT.Props> RemoveAbilityAsync( BT.ItemId pId, BT.AbilityList pAbilities) {
             BM.BasilMessage req = new BM.BasilMessage() {
                 Op = (uint)BM.BasilMessageOps.RemoveAbilityReq,
+                ItemId = pId.ToString(),
                 SessionAuth = ClientAuth.ToString()
             };
             AddAbilitiesToAProps(pAbilities, ref req);
@@ -118,6 +119,7 @@ namespace org.herbal3d.transport {
         public async Task<BT.Props> RequestPropertiesAsync(BT.ItemId pId, BT.Props pProps) {
             BM.BasilMessage req = new BM.BasilMessage() {
                 Op = (uint)BM.BasilMessageOps.RequestPropertiesReq,
+                ItemId = pId.ToString(),
                 SessionAuth = ClientAuth.ToString()
             };
             AddPropsToIProps(pProps, ref req);
@@ -137,7 +139,7 @@ namespace org.herbal3d.transport {
             BM.BasilMessage req = new BM.BasilMessage() {
                 Op = (uint)BM.BasilMessageOps.UpdatePropertiesReq,
                 SessionAuth = ClientAuth.ToString(),
-                ItemId = pId.Id
+                ItemId = pId.ToString()
             };
             AddPropsToIProps(pProps, ref req);
             BM.BasilMessage resp = await Connection.SendAndAwaitResponse(req);
@@ -157,6 +159,7 @@ namespace org.herbal3d.transport {
                 Op = (uint)BM.BasilMessageOps.MakeConnectionReq,
                 SessionAuth = ClientAuth.ToString()
             };
+            AddPropsToIProps(pProps, ref req);
             BM.BasilMessage resp = await Connection.SendAndAwaitResponse(req);
             return ReturnExceptionOrIProps(resp, "MakeConnection");
         }
@@ -198,8 +201,9 @@ namespace org.herbal3d.transport {
         private void AddAbilitiesToAProps(BT.AbilityList pAbilities, ref BM.BasilMessage pMsg) {
             if (pAbilities != null && pAbilities.Count > 0) {
                 foreach (var abil in pAbilities) {
-                    BM.ParamBlock pBlock = new BM.ParamBlock();
-                    pBlock.Ability = abil.AbilityCode;
+                    BM.ParamBlock pBlock = new BM.ParamBlock() {
+                        Ability = abil.AbilityCode
+                    };
                     abil.AddToProps(pBlock.Props);
                     pMsg.AProps.Add(pBlock);
                 }

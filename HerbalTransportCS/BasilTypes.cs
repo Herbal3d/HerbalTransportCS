@@ -134,8 +134,10 @@ namespace org.herbal3d.basil.protocol.BasilType {
         }
         protected void LoadFromProps(IDictionary<string,string> pProps, Dictionary<string,PropDefn> pDefn) {
             foreach (var kvp in pProps) {
-                if (pDefn.TryGetValue(kvp.Key.ToLower(), out PropDefn defn) ) {
-                    defn.SetStringValue(kvp.Value);
+                if (kvp.Value != null) {
+                    if (pDefn.TryGetValue(kvp.Key.ToLower(), out PropDefn defn) ) {
+                        defn.SetStringValue(kvp.Value);
+                    }
                 }
             }
         }
@@ -150,7 +152,7 @@ namespace org.herbal3d.basil.protocol.BasilType {
         // Return a ParamBlock for this Ability
         public static string VectorToString(double[] pVect) {
             string ret = null;
-            if (pVect.Length >= 3) {
+            if (pVect != null && pVect.Length >= 3) {
                 ret = String.Format("[{0},{1},{2}]", pVect[0], pVect[1], pVect[2]);
             }
             return ret;
@@ -160,7 +162,7 @@ namespace org.herbal3d.basil.protocol.BasilType {
         }
         public static string RotationToString(double[] pVect) {
             string ret = null;
-            if (pVect.Length >= 4) {
+            if (pVect != null && pVect.Length >= 4) {
                 ret = String.Format("[{0},{1},{2},{3}]", pVect[0], pVect[1], pVect[2], pVect[3]);
             }
             return ret;
@@ -170,7 +172,7 @@ namespace org.herbal3d.basil.protocol.BasilType {
         }
         public static string AabbToString(double[] pVect) {
             string ret = null;
-            if (pVect.Length >= 6) {
+            if (pVect != null && pVect.Length >= 6) {
                 ret = String.Format("[{0},{1},{2},{3},{4},{5}]",
                     pVect[0], pVect[1], pVect[2], pVect[3], pVect[4], pVect[5]);
             }
@@ -182,7 +184,7 @@ namespace org.herbal3d.basil.protocol.BasilType {
         private static double[] DoublesFromString(string pStr, int pLen) {
             double[] ret = null;
             try {
-                if (pStr.Trim().StartsWith("[")) {
+                if (pStr != null && pStr.Trim().StartsWith("[")) {
                     string[] pieces = pStr.Replace("[", "").Replace("]", "").Split(',');
                     if (pieces.Length == pLen) {
                         ret = pieces.Select(nn => { return Double.Parse(nn); }).ToArray();
@@ -197,11 +199,11 @@ namespace org.herbal3d.basil.protocol.BasilType {
     }
     public class AbilityDisplayable : AbilityBase {
         public string Code = "DISP";
-        public string Id;           // ID of Item this is associated with
-        public string DisplayType;  // Type of displayable
+        public string ItemId;           // ID of Item this is associated with
+        public string DisplayableType;  // Type of displayable
         public double[] Aabb;       // six doubles make up two vectors defining corners
-        public string Url;          // URL to the displayable information
-        public string Auth;         // Premission token for access URL
+        public string DisplayableUrl;          // URL to the displayable information
+        public string DisplayableAuth;         // Premission token for access URL
         public string LoaderType;   // Loader to use
 
         // For documentation, the list of loaders
@@ -223,18 +225,36 @@ namespace org.herbal3d.basil.protocol.BasilType {
             InitTable();
         }
         private void InitTable() {
-            AbilityProps.Add("id", new PropDefn("Id", () => { return Id; }, null,
-                                                    x => { Id = x; }, null));
-            AbilityProps.Add("displayable.type", new PropDefn("Displayable.Type", () => { return DisplayType; }, null,
-                                                    x => { DisplayType = x; }, null));
-            AbilityProps.Add("aabb", new PropDefn("Aabb", () => { return AabbToString(Aabb); }, () => { return Aabb; },
-                                                    x => { Aabb = AabbFromString(x); }, x => { Aabb = x; }));
-            AbilityProps.Add("url", new PropDefn("Url", () => { return Url; }, null,
-                                                    x => { Url = x; }, null));
-            AbilityProps.Add("auth", new PropDefn("Displayable.Auth", () => { return Auth; }, null,
-                                                    x => { Auth = x; }, null));
-            AbilityProps.Add("loadertype", new PropDefn("LoaderType", () => { return LoaderType; }, null,
-                                                    x => { LoaderType = x; }, null));
+            AbilityProps.Add("itemid", new PropDefn("ItemId",
+                                                    () => { return ItemId; },
+                                                    null,
+                                                    x => { ItemId = x; },
+                                                    null));
+            AbilityProps.Add("displayabletype", new PropDefn("DisplayableType",
+                                                    () => { return DisplayableType; },
+                                                    null,
+                                                    x => { DisplayableType = x; },
+                                                    null));
+            AbilityProps.Add("displayableaabb", new PropDefn("DisplayableAabb",
+                                                    () => { return AabbToString(Aabb); },
+                                                    () => { return Aabb; },
+                                                    x => { Aabb = AabbFromString(x); },
+                                                    x => { Aabb = x; }));
+            AbilityProps.Add("displayableurl", new PropDefn("DisplayableUrl",
+                                                    () => { return DisplayableUrl; },
+                                                    null,
+                                                    x => { DisplayableUrl = x; },
+                                                    null));
+            AbilityProps.Add("displayableauth", new PropDefn("DisplayableAuth",
+                                                    () => { return DisplayableAuth; },
+                                                    null,
+                                                    x => { DisplayableAuth = x; },
+                                                    null));
+            AbilityProps.Add("loadertype", new PropDefn("LoaderType",
+                                                    () => { return LoaderType; },
+                                                    null,
+                                                    x => { LoaderType = x; },
+                                                    null));
         }
         public AbilityDisplayable(IDictionary<string, string> pProps) {
             AbilityCode = Code;
@@ -246,27 +266,42 @@ namespace org.herbal3d.basil.protocol.BasilType {
     public class AbilityInstance : AbilityBase {
         public string Code = "INST";
 
-        public ItemId DisplayableId;
+        public ItemId DisplayableItemId = new ItemId(null);
         public double[] Pos = new double[] { 0,0,0 };
         public double[] Rot = new double[] { 0,0,0,1 };
-        public int PosSystem = PositionBlock.PosRefCode["WSG86"];
-        public int RotSystem = PositionBlock.RotRefCode["WORLDR"];
+        public int PosRef = PositionBlock.PosRefCode["WSG86"];
+        public int RotRef = PositionBlock.RotRefCode["WORLDR"];
 
         public AbilityInstance() {
             AbilityCode = Code;
             InitTable();
         }
         private void InitTable() {
-            AbilityProps.Add("displayableId", new PropDefn("Instance.DisplayableId", () => { return DisplayableId.Id; }, null ,
-                                                    x => { DisplayableId = new ItemId(x); }, null ));
-            AbilityProps.Add("pos", new PropDefn("Pos", () => { return AabbToString(Pos); }, () => { return Pos; },
-                                                    x => { Pos = AabbFromString(x); }, x => { Pos = x; }));
-            AbilityProps.Add("rot", new PropDefn("Rot", () => { return AabbToString(Rot); }, () => { return Rot; },
-                                                    x => { Rot = AabbFromString(x); }, x => { Rot = x; }));
-            AbilityProps.Add("possystem", new PropDefn("PosSystem", () => { return PosSystem.ToString(); }, null,
-                                                    x => { PosSystem = Int32.Parse(x); }, null));
-            AbilityProps.Add("rotsystem", new PropDefn("RotSystem", () => { return RotSystem.ToString(); }, null,
-                                                    x => { RotSystem = Int32.Parse(x); }, null));
+            AbilityProps.Add("displayableItemId", new PropDefn("DisplayableItemId",
+                                                    () => { return DisplayableItemId.Id; },
+                                                    null ,
+                                                    x => { DisplayableItemId = new ItemId(x); },
+                                                    null ));
+            AbilityProps.Add("pos", new PropDefn("Pos",
+                                                    () => { return AabbToString(Pos); },
+                                                    () => { return Pos; },
+                                                    x => { Pos = AabbFromString(x); },
+                                                    x => { Pos = x; }));
+            AbilityProps.Add("rot", new PropDefn("Rot",
+                                                    () => { return AabbToString(Rot); },
+                                                    () => { return Rot; },
+                                                    x => { Rot = AabbFromString(x); },
+                                                    x => { Rot = x; }));
+            AbilityProps.Add("posref", new PropDefn("PosRef",
+                                                    () => { return PosRef.ToString(); },
+                                                    null,
+                                                    x => { PosRef = Int32.Parse(x); },
+                                                    null));
+            AbilityProps.Add("rotref", new PropDefn("RotRef",
+                                                    () => { return RotRef.ToString(); },
+                                                    null,
+                                                    x => { RotRef = Int32.Parse(x); },
+                                                    null));
         }
         public AbilityInstance(IDictionary<string, string> pProps) {
             AbilityCode = Code;
@@ -292,9 +327,9 @@ namespace org.herbal3d.basil.protocol.BasilType {
                                                     x => { Pos = AabbFromString(x); }, x => { Pos = x; }));
             AbilityProps.Add("rot", new PropDefn("Rot", () => { return AabbToString(Rot); }, () => { return Rot; },
                                                     x => { Rot = AabbFromString(x); }, x => { Rot = x; }));
-            AbilityProps.Add("possystem", new PropDefn("PosSystem", () => { return PosSystem.ToString(); }, null,
+            AbilityProps.Add("posref", new PropDefn("PosRef", () => { return PosSystem.ToString(); }, null,
                                                     x => { PosSystem = Int32.Parse(x); }, null));
-            AbilityProps.Add("rotsystem", new PropDefn("RotSystem", () => { return RotSystem.ToString(); }, null,
+            AbilityProps.Add("rotref", new PropDefn("RotRef", () => { return RotSystem.ToString(); }, null,
                                                     x => { RotSystem = Int32.Parse(x); }, null));
         }
         public AbilityCamera(IDictionary<string, string> pProps) {
