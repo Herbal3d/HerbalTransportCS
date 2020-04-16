@@ -95,7 +95,9 @@ namespace org.herbal3d.transport {
 
         private void Connection_OnMessage(string pMsg) {
             if (IsConnected) {
-                MsgHandler.Receive(pMsg);
+                if (MsgHandler != null) {
+                    MsgHandler.Receive(pMsg);
+                }
             }
         }
 

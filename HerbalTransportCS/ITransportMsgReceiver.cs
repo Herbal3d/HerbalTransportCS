@@ -14,14 +14,15 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace org.herbal3d.transport {
-    public abstract class IMsgReceiver {
+    // Base abstract class for things that receive messages
+    //public abstract class ITransportMsgReceiver {
+    public interface ITransportMsgReceiver {
 
-        public IMsgReceiver() {
-        }
+        void Receive(byte[] pMsg);
+        void Receive(string pMsg);
 
-        public abstract void Receive(byte[] pMsg);
-        public abstract void Receive(string pMsg);
+        void Send(byte[] pMsg);
 
-        public abstract void AbortConnection();
+        void AbortConnection();
     }
 }

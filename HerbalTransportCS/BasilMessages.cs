@@ -1,4 +1,4 @@
-﻿// Copyright (c) 2019 Robert Adams
+// Copyright (c) 2019 Robert Adams
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,40 +45,23 @@ namespace Herbal3d.HerbalTransportCS {
         AliveCheckResp              = 302,
     }
 
-    public enum AbilityCode {
-        AuthAbility                 = 701,
-        DisplayAbility              = 702,
-        InstanceAbility             = 703,
-        AnimateAbility              = 704,
-        FollowAbility               = 705,
-        UIAbility                   = 706,
-    }
-
     public enum CoordSystem {
-        WGS86 = 0,      // WGS84 earth coordinates
-        CAMERA = 1,     // Coordinates relative to camera position (-1..1 range, zero center)
-        CAMERAABS = 2,  // Absolute coordinates relative to the camera position (zero center)
-        VIRTUAL = 3,    // Zero based un-rooted coordinates
-        MOON = 4,       // Earth-moon coordinates
-        MARS = 5,       // Mars coordinates
-        REL1 = 6,       // Mutually agreed base coordinates
-        REL2 = 7,
-        REL3 = 8
+        WGS86       = 0,    // WGS84 earth coordinates
+        CAMERA      = 1,    // Coordinates relative to camera position (-1..1 range, zero center)
+        CAMERAABS   = 2,    // Absolute coordinates relative to the camera position (zero center)
+        VIRTUAL     = 3,    // Zero based un-rooted coordinates
+        MOON        = 4,    // Earth-moon coordinates
+        MARS        = 5,    // Mars coordinates
+        REL1        = 6,    // Mutually agreed base coordinates
+        REL2        = 7,
+        REL3        = 8
     }
 
     public enum RotationSystem {
-        WORLDR = 0,      // rotation is relative to world coordinates
-        FORR = 1,        // rotation is relative to current frame of reference
-        CAMERAR = 2      // rotation is relative to the camera direction
-    }
-
-    public enum TransportClass {
-        Default = 0,
-        BestCase = 10,
-        // Above 100 is a priority range
-        LowPriority = 100,
-        MedPriority = 150,
-        HighPriority = 200
+        WORLDR      = 0,    // rotation is relative to world coordinates
+        LOCALR      = 1,    // rotation is relative to referened object
+        FORR        = 2,    // rotation is relative to current frame of reference
+        CAMERAR     = 3     // rotation is relative to the camera direction
     }
 
     public class BasilMessage {
@@ -87,8 +70,6 @@ namespace Herbal3d.HerbalTransportCS {
         public ulong resp;          // unique value to tie a response to a request
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string respKey;      // optional key to verify a response
-        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public string sAuth;        // authorization for the session
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public uint sId;            // if there are multiple streams in one connection
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
@@ -122,7 +103,17 @@ namespace Herbal3d.HerbalTransportCS {
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public uint op;             // the operation to perform
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
-        public Dictionary<string, string> props;    // item properties being modified
+        public string sAuth;        // authorization for the session
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string itemId;       // item referenced by this operation
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public uint itemIdN;        // item referenced by this operation
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public string iAuth;        // authorization for the referenced item
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public Dictionary<string, string> iprops;    // item properties being modified
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public Dictionary<string, string> aprops;    // item properties being modified
 
         // A response includes exception information.
         // No error is 'exception' being undefined.
