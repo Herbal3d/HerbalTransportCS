@@ -283,14 +283,14 @@ namespace org.herbal3d.basil.protocol.BasilType {
                                                     x => { DisplayableItemId = new ItemId(x); },
                                                     null ));
             AbilityProps.Add("pos", new PropDefn("Pos",
-                                                    () => { return AabbToString(Pos); },
+                                                    () => { return VectorToString(Pos); },
                                                     () => { return Pos; },
-                                                    x => { Pos = AabbFromString(x); },
+                                                    x => { Pos = VectorFromString(x); },
                                                     x => { Pos = x; }));
             AbilityProps.Add("rot", new PropDefn("Rot",
-                                                    () => { return AabbToString(Rot); },
+                                                    () => { return RotationToString(Rot); },
                                                     () => { return Rot; },
-                                                    x => { Rot = AabbFromString(x); },
+                                                    x => { Rot = RotationFromString(x); },
                                                     x => { Rot = x; }));
             AbilityProps.Add("posref", new PropDefn("PosRef",
                                                     () => { return PosRef.ToString(); },
