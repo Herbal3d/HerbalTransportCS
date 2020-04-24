@@ -25,6 +25,7 @@
       <Reference name="Mono.Addins"/>
 
       <Reference name="Herbal3d.CommonEntitiesUtil"/>
+      <Reference name="Herbal3d.OSAuth"/>
 
       <Reference name="Nini"/>
       <Reference name="log4net"/>
