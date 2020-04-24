@@ -155,6 +155,7 @@ namespace org.herbal3d.transport {
             */
         }
         public async Task<BT.Props> MakeConnectionAsync(BT.Props pProps) {
+            Connection.Context.Log.DebugFormat("BasilComm.MakeConnectionAsync: pProps={0}", pProps.ToString());
             BM.BasilMessage req = new BM.BasilMessage() {
                 Op = (uint)BM.BasilMessageOps.MakeConnectionReq,
                 SessionAuth = ClientAuth.ToString()
@@ -177,7 +178,8 @@ namespace org.herbal3d.transport {
         private void AddPropsToIProps(BT.Props pProps, ref BM.BasilMessage pMsg) {
             if (pProps != null) {
                 foreach (var kvp in pProps) {
-                    pMsg.IProps.Add(kvp.Key, kvp.Value);
+                    if (kvp.Value != null)
+                        pMsg.IProps.Add(kvp.Key, kvp.Value);
                 }
             }
         }

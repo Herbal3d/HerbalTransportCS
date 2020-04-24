@@ -41,7 +41,7 @@ namespace org.herbal3d.transport {
 
         public TransportContext Context;
 
-        private List<ITransportConnection> _transports = new List<ITransportConnection>();
+        private readonly List<ITransportConnection> _transports = new List<ITransportConnection>();
         private Task _WSListenerTask;
         private Task _SocketListenerTask;
 

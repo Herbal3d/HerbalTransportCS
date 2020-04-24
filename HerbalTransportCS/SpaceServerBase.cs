@@ -22,6 +22,7 @@ using BM = org.herbal3d.basil.protocol.Message;
 using BT = org.herbal3d.basil.protocol.BasilType;
 using HT = org.herbal3d.transport;
 using org.herbal3d.OSAuth;
+using System.Diagnostics;
 
 namespace org.herbal3d.transport {
     // A base class for space server implementations.
@@ -51,9 +52,11 @@ namespace org.herbal3d.transport {
         // Once a connection is made, alive check processor is added
         public AliveCheck AliveChecker;
 
-        public SpaceServerBase(CancellationTokenSource pCanceller, BasilConnection pBasilConnection) {
+        public SpaceServerBase(CancellationTokenSource pCanceller,
+                        BasilConnection pBasilConnection, string pLayerName) {
             Canceller = pCanceller;
             ClientConnection = pBasilConnection;
+            LayerName = pLayerName;
 
             HT.BasilConnection.Processors processors = new HT.BasilConnection.Processors {
                 { (Int32)BM.BasilMessageOps.OpenSessionReq, this.ProcOpenSessionReq },
@@ -114,7 +117,7 @@ namespace org.herbal3d.transport {
         }
         // Do work for the open session.
         protected abstract void DoOpenSessionWork(BasilConnection pConnection, BasilComm pClient,
-                                        Dictionary<string,string> pParms);
+                                        BT.Props pParms);
         // OpenSession is the other side logging in. Verify the token that was sent
         protected abstract bool VerifyClientAuthentication(OSAuthToken pUserToken);
         // Process a received OpenSessionRequest.
@@ -126,7 +129,7 @@ namespace org.herbal3d.transport {
 
             if (pReq.IProps != null && pReq.IProps.Count > 0) {
                 // DEBUG DEBUG
-                ClientConnection.Context.Log.DebugFormat("{0} Received OpenSession. Starting Tester", _logHeader);
+                ClientConnection.Context.Log.DebugFormat("{0} Received OpenSession.", _logHeader);
                 foreach (var kvp in pReq.IProps) {
                     ClientConnection.Context.Log.DebugFormat("{0}       {1}: {2}", _logHeader, kvp.Key, kvp.Value);
                 }
@@ -135,10 +138,7 @@ namespace org.herbal3d.transport {
                 // This connection gets a unique handle
                 string connectionKey = Util.RandomString(10);
 
-                // The client gives us a token that authenticates to all our requests to the client
-                OSAuthToken clientToken = OSAuthToken.FromString(pReq.SessionAuth);
-
-                if (VerifyClientAuthentication(clientToken)) {
+                if (VerifyClientAuthentication(OSAuthToken.FromString(pReq.SessionAuth))) {
                     // Create a key to uniquify this session
                     // Use the version sent by the client if it is supplied
                     SessionKey = null;
@@ -153,7 +153,7 @@ namespace org.herbal3d.transport {
                     try {
                         pReq.IProps.TryGetValue("ClientAuth", out string clientAuth);
                         if (clientAuth != null) {
-                            clientToken = OSAuthToken.FromString(clientAuth);
+                            OSAuthToken clientToken = OSAuthToken.FromString(clientAuth);
                             clientToken.Srv = "client";
                             clientToken.Sid = SessionKey;
                             // This puts the token to send with requests in requesters
@@ -166,38 +166,37 @@ namespace org.herbal3d.transport {
                         resp.Exception = "Client authentication info misformed";
                         resp.ExceptionHints.Add("Exception", e.ToString());
                         resp.ExceptionHints.Add("ClientAuthInfo", pReq.SessionAuth);
-                        clientToken = null;
+                        ClientAuth = null;
                     }
-                }
-                // Add a processor for the alive check messages
-                AliveChecker = new AliveCheck(Canceller, ClientConnection) {
-                    ClientAuth = ClientAuth
-                };
 
-                // The rest of the communication uses this per-user/per-session token
-                SessionAuth = new OSAuthToken() {
-                    Srv = LayerName,
-                    Sid = SessionKey
-                };
-                // The client told use the token to use to talk to it
-                ClientAuth = clientToken;
+                    if (ClientAuth != null) {
+                        // Add a processor for the alive check messages
+                        if (ClientConnection.Context.Params.P<bool>("ShouldAliveCheckSessions")) {
+                            AliveChecker = new AliveCheck(Canceller, ClientConnection) {
+                                ClientAuth = ClientAuth
+                            };
+                        };
 
-                // Return the authorization information to the client
-                if (clientToken != null) {
-                    resp.IProps.Add("SessionAuth", SessionAuth.ToString());
-                    resp.IProps.Add("SessionKey", SessionKey);
-                    resp.IProps.Add("ConnectionKey", connectionKey);
-                    resp.IProps.Add("Services", "[]");
+                        SessionAuth = new OSAuthToken() {
+                            Srv = LayerName,
+                            Sid = SessionKey
+                        };
+
+                        // Return the authorization information to the client
+                        resp.IProps.Add("SessionAuth", SessionAuth.ToString());
+                        resp.IProps.Add("SessionKey", SessionKey);
+                        resp.IProps.Add("ConnectionKey", connectionKey);
+                        resp.IProps.Add("Services", "[]");  // kept for downward compatability
+
+                        // Note: this is next work is done on the messaging thread so the response doesn't
+                        //    go back before the connection is set up. The called routine should spool off
+                        //    any long tasks.
+                        DoOpenSessionWork(ClientConnection, Client, new BT.Props(pReq.IProps));
+                    };
                 }
                 else {
-                    resp.Exception = "Client authorization info not present";
-                }
-                // Change the parameters to a regular collection from the ProtoBuf data type
-                Dictionary<string, string> parms = pReq.IProps.ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-                // Note: this is next work is done on the messaging thread so the response doesn't
-                //    go back before the connection is set up. The called routine should spool off
-                //    any long tasks.
-                DoOpenSessionWork(ClientConnection, Client, parms);
+                    resp.Exception = "Not authorized";
+                };
             }
             else {
                 resp.Exception = "Connection not initialized";

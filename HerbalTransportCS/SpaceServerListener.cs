@@ -48,9 +48,11 @@ namespace org.herbal3d.transport {
         protected HT.ServerListener _transport;
 
         protected CreateSpaceServerProcessor _createProcessor;
+        public ParamBlock ListenerParams;
 
         public delegate HT.SpaceServerBase CreateSpaceServerProcessor(CancellationTokenSource pCanceller,
-                                                                        HT.BasilConnection pConnection);
+                                                                        HT.BasilConnection pConnection,
+                                                                        ParamBlock pListenerParams);
 
         public SpaceServerListener(ParamBlock pParams, CancellationTokenSource pCanceller,
                                         BLogger pDebugLogger, CreateSpaceServerProcessor pProcessor) {
@@ -59,20 +61,22 @@ namespace org.herbal3d.transport {
             _createProcessor = pProcessor;
 
             // Make sure we have all the parameters and set defaults
-            ParamBlock completeParams = new ParamBlock(null, pParams,
+            ListenerParams = new ParamBlock(null, pParams,
                 new ParamBlock(new Dictionary<string, object>() {
                     { "IsSecure", false },
                     { "ConnectionURL", "" },        // null or empty means no WS connection
                     { "SecureConnectionURL", "ws://localhost:9999" },
                     { "SocketConnectionURL", "" },  // null or empty means no socket connection
                     { "DisableNaglesAlgorithm", true },
-                    { "ExternalAccessHostname", "" }
+                    { "ExternalAccessHostname", "" },
+                    // If the caller hadn't created an initial connection token, create default
+                    { "OpenSessionAuthentication", new OSAuthToken().ToString() }
                 })
             );
 
             // DEBUG DEBUG
             _log.DebugFormat("{0} Create BasilTestLayer", _logHeader);
-            foreach (var kvp in completeParams.Params) {
+            foreach (var kvp in ListenerParams.Params) {
                 _log.DebugFormat("     {0} -> {1}", kvp.Key, kvp.Value);
             }
             // END DEBUG DEBUG
@@ -82,7 +86,7 @@ namespace org.herbal3d.transport {
 
             try {
                 _log.DebugFormat("{0} Initializing transport", _logHeader);
-                _transport = new HT.ServerListener(completeParams, _log);
+                _transport = new HT.ServerListener(ListenerParams, _log);
                 _transport.OnBasilConnect += Event_NewBasilConnection;
                 _transport.OnDisconnect += Event_DisconnectBasilConnection;
                 _transport.Start(_canceller);
@@ -92,8 +96,8 @@ namespace org.herbal3d.transport {
             }
 
             // Build a URI for external hosts to access this layer
-            UriBuilder connectionUri = new UriBuilder(completeParams.P<string>("ConnectionURL")) {
-                Host = completeParams.P<string>("ExternalAccessHostname")
+            UriBuilder connectionUri = new UriBuilder(ListenerParams.P<string>("ConnectionURL")) {
+                Host = ListenerParams.P<string>("ExternalAccessHostname")
             };
             RemoteConnectionURL = connectionUri.ToString();
         }
@@ -104,14 +108,7 @@ namespace org.herbal3d.transport {
             // Cancellation token for this client connection
             CancellationTokenSource sessionCanceller = new CancellationTokenSource();
             // Create the processor for the SpacceServer commands
-            Sessions.Add(_createProcessor(sessionCanceller, pBasilConnection));
-        }
-
-        // Create an instance of the underlying class.
-        // Each child class will override this method with proper logic to create the SpaceServer session
-        protected virtual HT.SpaceServerBase InstanceFactory(CancellationTokenSource pCanceller,
-                        HT.BasilConnection pConnection) {
-            throw new NotImplementedException();
+            Sessions.Add(_createProcessor(sessionCanceller, pBasilConnection, ListenerParams));
         }
 
         // One of the Basil servers has disconnected

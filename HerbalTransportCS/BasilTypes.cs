@@ -46,6 +46,19 @@ namespace org.herbal3d.basil.protocol.BasilType {
             }
             return this;
         }
+        public override string ToString() {
+            StringBuilder buff = new StringBuilder();
+            buff.Append("{ ");
+            foreach (var kvp in this) {
+                buff.Append("{ ");
+                buff.Append(kvp.Key);
+                buff.Append(": ");
+                buff.Append(kvp.Value.ToString());
+                buff.Append("} ");
+            }
+            buff.Append(" }");
+            return buff.ToString();
+        }
     }
     public class ParamBlock {
         public string Ability;

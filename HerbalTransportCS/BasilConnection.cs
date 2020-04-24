@@ -108,9 +108,6 @@ namespace org.herbal3d.transport {
             Send(pReq);
             BM.BasilMessage resp = await tcs.Task;
             // Context.Log.DebugFormat("{0} SendAndAwaitResponse: Received '{1}'", _logHeader, resp);
-            if (! String.IsNullOrEmpty(resp.Exception)) {
-                throw new BasilException(resp.Exception, new Dictionary<string,string>(resp.ExceptionHints));
-            }
             return resp;
         }
 
