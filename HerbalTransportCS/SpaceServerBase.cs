@@ -128,12 +128,12 @@ namespace org.herbal3d.transport {
             };
 
             if (pReq.IProps != null && pReq.IProps.Count > 0) {
-                // DEBUG DEBUG
+                /* // DEBUG DEBUG
                 ClientConnection.Context.Log.DebugFormat("{0} Received OpenSession.", _logHeader);
                 foreach (var kvp in pReq.IProps) {
                     ClientConnection.Context.Log.DebugFormat("{0}       {1}: {2}", _logHeader, kvp.Key, kvp.Value);
                 }
-                // END DEBUG DEBUG
+                // END DEBUG DEBUG */
 
                 // This connection gets a unique handle
                 string connectionKey = Util.RandomString(10);
