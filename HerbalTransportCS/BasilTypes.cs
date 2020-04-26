@@ -160,7 +160,7 @@ namespace org.herbal3d.basil.protocol.BasilType {
         }
         // Must be overridden by sub-classes
         public void LoadFromProps(IDictionary<string, string> pProps) {
-            AddToProps(pProps, AbilityProps);
+            LoadFromProps(pProps, AbilityProps);
         }
         // Return a ParamBlock for this Ability
         public static string VectorToString(double[] pVect) {
@@ -290,7 +290,7 @@ namespace org.herbal3d.basil.protocol.BasilType {
             InitTable();
         }
         private void InitTable() {
-            AbilityProps.Add("displayableItemId", new PropDefn("DisplayableItemId",
+            AbilityProps.Add("displayableitemid", new PropDefn("DisplayableItemId",
                                                     () => { return DisplayableItemId.Id; },
                                                     null ,
                                                     x => { DisplayableItemId = new ItemId(x); },
