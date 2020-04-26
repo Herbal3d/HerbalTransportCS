@@ -217,6 +217,7 @@ namespace org.herbal3d.basil.protocol.BasilType {
         public double[] Aabb;       // six doubles make up two vectors defining corners
         public string DisplayableUrl;          // URL to the displayable information
         public string DisplayableAuth;         // Premission token for access URL
+        public string AssetServiceType;         // Premission token for access URL
         public string LoaderType;   // Loader to use
 
         // For documentation, the list of loaders
@@ -226,6 +227,12 @@ namespace org.herbal3d.basil.protocol.BasilType {
             "FBX",
             "OBJ",
             "BVH"
+        };
+
+        public List<string> AssetServiceTypes = new List<string>() {
+            "HTTP", // just fetch using HTTP (and header "Authorize")
+            "RAGU", // embed authorization in URL with "bearer-"
+            "S3"    // use S3 REST access
         };
 
         // For documentation, the list of available types
@@ -262,6 +269,11 @@ namespace org.herbal3d.basil.protocol.BasilType {
                                                     () => { return DisplayableAuth; },
                                                     null,
                                                     x => { DisplayableAuth = x; },
+                                                    null));
+            AbilityProps.Add("assetservicetype", new PropDefn("AssetServiceType",
+                                                    () => { return AssetServiceType; },
+                                                    null,
+                                                    x => { AssetServiceType = x; },
                                                     null));
             AbilityProps.Add("loadertype", new PropDefn("LoaderType",
                                                     () => { return LoaderType; },
