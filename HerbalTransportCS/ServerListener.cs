@@ -134,7 +134,7 @@ namespace org.herbal3d.transport {
                 // Loop around waiting for connections
                 using (server) {
                     server.Start(socket => {
-                        Context.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
+                        // Context.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
                         SetupServerBasilConnection(new TransportWS(socket, Context));
                     });
                     // wait around in this thread until time to stop and release the server
@@ -152,7 +152,7 @@ namespace org.herbal3d.transport {
             lock (_transports) {
                 // When someone connects, set up BasilMessage processing
                 pTransport.OnConnect += transport => {
-                    Context.Log.DebugFormat("{0} OnConnect event", _logHeader);
+                    // Context.Log.DebugFormat("{0} OnConnect event", _logHeader);
                     var basilConnection = new BasilConnection(pTransport, Context);
                     pTransport.MsgHandler = basilConnection;
                     TriggerConnect(transport);

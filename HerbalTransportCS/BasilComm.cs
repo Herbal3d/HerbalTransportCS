@@ -155,7 +155,7 @@ namespace org.herbal3d.transport {
             */
         }
         public async Task<BT.Props> MakeConnectionAsync(BT.Props pProps) {
-            Connection.Context.Log.DebugFormat("BasilComm.MakeConnectionAsync: pProps={0}", pProps.ToString());
+            // Connection.Context.Log.DebugFormat("BasilComm.MakeConnectionAsync: pProps={0}", pProps.ToString());
             BM.BasilMessage req = new BM.BasilMessage() {
                 Op = (uint)BM.BasilMessageOps.MakeConnectionReq,
                 SessionAuth = ClientAuth.ToString()
