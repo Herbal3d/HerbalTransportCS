@@ -93,10 +93,10 @@ namespace org.herbal3d.transport {
         public async Task<BM.BasilMessage> SendAndAwaitResponse(BM.BasilMessage pReq) {
             // _context.Log.DebugFormat("{0} SendAndAwaitResponse", _logHeader);
             // Place structure in message that receiver will send back so we can match response.
-            UInt32 thisSession = (UInt32)_randomNumbers.Next();
-            pReq.ResponseCode = thisSession;
-            var tcs = new TaskCompletionSource<BM.BasilMessage>();
+            TaskCompletionSource<BM.BasilMessage> tcs = new TaskCompletionSource<BM.BasilMessage>();
             lock (OutstandingRPC) {
+                UInt32 thisSession = (UInt32)_randomNumbers.Next();
+                pReq.ResponseCode = thisSession;
                 OutstandingRPC.Add(thisSession, new BasilConnection.SentRPC() {
                     session = thisSession,
                     context = this,
