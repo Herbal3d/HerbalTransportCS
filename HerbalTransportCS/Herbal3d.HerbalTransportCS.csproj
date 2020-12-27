@@ -1,33 +1,202 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="14.0">
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>org.herbal3d.transport</RootNamespace>
-    <Version>2.1.1</Version>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Copyright>Copyright 2020, Robert Adams</Copyright>
-    <Description>Common transport routines for Herbal3d communication between Basil and SpaceServers</Description>
-    <PackageProjectUrl>https://github.com/Herbal3d/HerbalTransportCS</PackageProjectUrl>
-    <PackageLicenseFile>LICENSE</PackageLicenseFile>
-    <AssemblyVersion>2.1.1.0</AssemblyVersion>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>16.7.3</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2DD94790-0000-0000-0000-000000000000}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>Herbal3d.HerbalTransportCS</AssemblyName>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>
+    </AppDesignerFolder>
+    <RootNamespace>Herbal3d.HerbalTransportCS</RootNamespace>
+    <StartupObject>
+    </StartupObject>
+    <StartArguments>
+    </StartArguments>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <TargetFrameworkProfile />
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;DEBUG;</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>True</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <Optimize>False</Optimize>
+    <OutputPath>..\..\..\bin\</OutputPath>
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <RemoveIntegerChecks>False</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <NoStdLib>False</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>False</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>False</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;</DefineConstants>
+    <DocumentationFile>
+    </DocumentationFile>
+    <DebugSymbols>False</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <Optimize>True</Optimize>
+    <OutputPath>..\..\..\bin\</OutputPath>
+    <RegisterForComInterop>False</RegisterForComInterop>
+    <RemoveIntegerChecks>False</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
+    <NoStdLib>False</NoStdLib>
+    <NoWarn>
+    </NoWarn>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>False</Prefer32Bit>
+  </PropertyGroup>
   <ItemGroup>
-    <None Include="..\LICENSE">
-      <Pack>True</Pack>
-      <PackagePath></PackagePath>
-    </None>
+    <Reference Include="Fleck">
+      <Name>Fleck</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Google.Protobuf">
+      <Name>Google.Protobuf</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="log4net">
+      <Name>log4net</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Mono.Addins">
+      <Name>Mono.Addins</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <Name>Newtonsoft.Json</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Nini">
+      <Name>Nini</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System">
+      <Name>System</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Collections.Concurrent">
+      <Name>System.Collections.Concurrent</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.IO">
+      <Name>System.IO</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Linq">
+      <Name>System.Linq</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Reflection">
+      <Name>System.Reflection</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Security.Cryptography.X509Certificates">
+      <Name>System.Security.Cryptography.X509Certificates</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Threading">
+      <Name>System.Threading</Name>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Threading.Tasks">
+      <Name>System.Threading.Tasks</Name>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
-
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.11.4" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="Fleck" Version="1.1.0" />
+    <ProjectReference Include="..\..\HerbalCommonEntitiesCS\CommonEntitiesUtil\Herbal3d.CommonEntitiesUtil.csproj">
+      <Name>Herbal3d.CommonEntitiesUtil</Name>
+      <Project>{59F9BD1D-0000-0000-0000-000000000000}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>False</Private>
+    </ProjectReference>
+    <ProjectReference Include="..\..\OSAuthModule\OSAuth\Herbal3d.OSAuth.csproj">
+      <Name>Herbal3d.OSAuth</Name>
+      <Project>{65FDD8FD-0000-0000-0000-000000000000}</Project>
+      <Package>{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</Package>
+      <Private>False</Private>
+    </ProjectReference>
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\..\HerbalCommonEntitiesCS\CommonEntitiesUtil\Herbal3d.CommonEntitiesUtil.csproj" />
-    <ProjectReference Include="..\..\OSAuthModule\OSAuth\Herbal3d.OSAuth.csproj" />
+    <Compile Include="AliveCheck.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BasilComm.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BasilConnection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BasilException.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BasilMessages.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BasilTypes.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="BTimeSpan.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ITransportConnection.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ITransportMsgReceiver.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ServerListener.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SpaceServerBase.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="SpaceServerListener.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TransportSocket.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="TransportWS.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="gen\BasilMessage.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
-
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
 </Project>
