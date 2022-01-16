@@ -30,12 +30,13 @@ namespace org.herbal3d.transport {
         CLOSED
     };
 
-    public delegate void BTransportOnStateChangeCallback(BTransport pTransport, BTransportConnectionStates pNewState);
+    public delegate void BTransportOnStateChangeCallback(BTransport pTransport, BTransportConnectionStates pNewState, object pContext);
     public delegate void BTransportOnOpenCallback(BTransport pTransport);
     public delegate void BTransportOnMsgCallback(BTransport pTransport, byte[] pMsg, object pContext);
     public delegate void BTransportOnCloseCallback(BTransport pTransport);
     public delegate void BTransportOnErrorCallback(BTransport pTransport);
 
+    // When setup to listen for a network connection, this is called when a new connection is received
     public delegate void BTransportConnectionAcceptedProcessor(BTransport pTransport,
                                                     CancellationTokenSource pCanceller,
                                                     ParamBlock pListenerParams);
@@ -70,12 +71,22 @@ namespace org.herbal3d.transport {
         protected BlockingCollection<byte[]> _receiveQueue;
         protected BlockingCollection<byte[]> _sendQueue;
 
+        protected readonly BLogger _log;
+
         public string ConnectionName = "UNKNOWN";
 
-        public BTransport() {
+        public BTransport(BLogger pLog) {
+            _log = pLog;
+            if (_log == null) {
+                throw new Exception("BTransportWS.constructor: logger parameter null");
+            }
+
             _connectionState = BTransportConnectionStates.INITIALIZING;
             _receiveQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
             _sendQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
+        }
+
+        public virtual void Start(ParamBlock pParams) {
         }
 
         public abstract void Close();
@@ -94,7 +105,7 @@ namespace org.herbal3d.transport {
         // This seems to be the .NET pattern for how you do events.
         protected virtual void OnStateChanged() {
             BTransportOnStateChangeCallback cb = OnStateChange;
-            cb?.Invoke(this, _connectionState);
+            cb?.Invoke(this, _connectionState, _receptionCallbackContext);
         }
         protected virtual void OnOpened() {
             BTransportOnOpenCallback cb = OnOpen;

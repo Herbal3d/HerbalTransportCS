@@ -39,6 +39,10 @@ namespace org.herbal3d.transport {
             _transport = pTransport;
         }
 
+        /*
+         * Set the function called when a message is received.
+         * The "context" is passed so the called function can have the class instance that asked for the message
+         */
         public void SetReceiveCallback(BProtocolReceptionCallback pCallback, object pContext) {
             _receptionCallback = pCallback;
             _receptionCallbackContext = pContext;

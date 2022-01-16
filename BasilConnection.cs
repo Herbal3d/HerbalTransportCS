@@ -35,7 +35,7 @@ namespace org.herbal3d.transport {
 
     // Class of processors called when new messages are received.
     public class IncomingMessageProcessor {
-        private object _callersContext;
+        private readonly object _callersContext;
         public IncomingMessageProcessor(object pContext) {
             _callersContext = pContext;
         }

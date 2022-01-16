@@ -28,7 +28,6 @@ namespace org.herbal3d.transport {
         private static readonly string _logHeader = "[BTransportWS]";
 
         private readonly CancellationToken _overallCancellation;
-        private readonly BLogger _log;
         private WebSocketServer _server;
         private IWebSocketConnection _connection;
 
@@ -36,7 +35,7 @@ namespace org.herbal3d.transport {
          * Transport for receiving and sending via WebSockets.
          * Receives a text or binary blob and passes it up the a BProtocol for translation.
          */
-        public BTransportWS(IWebSocketConnection pSocket, CancellationToken pCanceller, BLogger pLogger): base() {
+        public BTransportWS(IWebSocketConnection pSocket, CancellationToken pCanceller, BLogger pLogger): base(pLogger) {
             _connection = pSocket;
             _overallCancellation = pCanceller;
 
@@ -51,10 +50,6 @@ namespace org.herbal3d.transport {
 
             if (_overallCancellation == null) {
                 throw new Exception("BTransportWS.constructor: OverallCancellation parameter null");
-            }
-            _log = pLogger;
-            if (_log == null) {
-                throw new Exception("BTransportWS.constructor: logger parameter null");
             }
             StartInputAndOutputQueueTasks();
         }

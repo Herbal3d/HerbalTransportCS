@@ -24,9 +24,13 @@ namespace org.herbal3d.transport {
     /**
      * Receive a JSON transport body and pass a BMessage up the stack.
      */
+
     public class BProtocolJSON : BProtocol {
         public BProtocolJSON(ParamBlock pParams, BTransport pTransport) : base(pTransport) {
-            pTransport.SetReceiveCallback(BProtocolJSON.ProcessReception, this);
+            // set up to receive messages
+            pTransport.OnMsg += BProtocolJSON.ProcessOnMsg;
+            pTransport.ReceptionCallbackContext = this;
+            pTransport.OnStateChange += BProtocolJSON.ProcessOnStateChange;
         }
 
         public override void Close() {
@@ -43,8 +47,12 @@ namespace org.herbal3d.transport {
             throw new NotImplementedException();
         }
 
-        private static void ProcessReception(byte[] pData, object pContext, BTransport pTransport) {
-            BProtocolJSON caller = (BProtocolJSON)pContext;
+        private static void ProcessOnStateChange(BTransport pTransport, BTransportConnectionStates pState, object pContext) {
+            BProtocolJSON caller = pContext as BProtocolJSON;
+        }
+
+        private static void ProcessOnMsg(BTransport pTransport, byte[] pData, object pContext) {
+            BProtocolJSON caller = pContext as BProtocolJSON;
             BMessage bmsg;
 
             // convert received buffer from JSON into a BMessage
