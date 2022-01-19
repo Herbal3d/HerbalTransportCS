@@ -119,20 +119,17 @@ namespace org.herbal3d.transport {
         // This starts a connection listener for the passed "ConnectionURL".
         // For each connection received, a new BTransportWS is created and
         //    passed to the BTransportConnectionAcceptedProcesssor.
-        public static Task ConnectionListener(ParamBlock pParams,
-                            BTransportConnectionAcceptedProcessor pProcessor,
-                            CancellationTokenSource pCancellerSource,
-                            BLogger pLogger) {
-            ParamBlock _params = new ParamBlock(null, pParams,
-                    new ParamBlock(new Dictionary<string, object>() {
-                        {  "ConnectionURL",          "" },
-                        {  "IsSecure",               false},
-                        {  "SecureConnectionURL",    ""},
-                        {  "Certificate",            null},
-                        {  "DisableNaglesAlgorithm", true},
-                        {  "ExternalAccessHostname", ""}
-                    }));
-
+        public static Task ConnectionListener(
+                            bool isSecure,
+                            string connectionURL,
+                            string secureConnectionURL,
+                            string certificate,
+                            BTransportConnectionAcceptedProcessor connectionProcessor,
+                            CancellationTokenSource cancellerSource,
+                            BLogger logger,
+                            bool disableNaglesAlgorithm = true,
+                            string externalAccessHostname = ""
+                            ) {
 
             return Task.Run(() => {
                 WebSocketServer _server;
@@ -160,22 +157,21 @@ namespace org.herbal3d.transport {
                 */
 
                 // For debugging, it is possible to set up a non-encrypted connection
-                string transportURL = _params.P<string>("ConnectionURL");
-                if (transportURL.StartsWith("wss:")) {
-                    pLogger.Debug("{0} Creating secure server on {1}", _logHeader, transportURL);
-                    _server = new WebSocketServer(transportURL) {
-                        Certificate = new X509Certificate2(_params.P<string>("Certificate")),
+                if (connectionURL.StartsWith("wss:")) {
+                    logger.Debug("{0} Creating secure server on {1}", _logHeader, connectionURL);
+                    _server = new WebSocketServer(connectionURL) {
+                        Certificate = new X509Certificate2(certificate),
                         EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
                     };
                 }
                 else {
-                    pLogger.Debug("{0} Creating insecure server on {1}", _logHeader, transportURL);
-                    _server = new WebSocketServer(transportURL);
+                    logger.Debug("{0} Creating insecure server on {1}", _logHeader, connectionURL);
+                    _server = new WebSocketServer(connectionURL);
                 }
 
                 // Disable the ACK delay for better responsiveness
-                if (_params.P<bool>("DisableNaglesAlgorithm")) {
-                    pLogger.Debug("{0} Disabling Nagles algorightm", _logHeader);
+                if (disableNaglesAlgorithm) {
+                    logger.Debug("{0} Disabling Nagles algorightm", _logHeader);
                     _server.ListenerSocket.NoDelay = true;
                 }
 
@@ -183,10 +179,10 @@ namespace org.herbal3d.transport {
                     // Context.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
                     CancellationTokenSource _connectionCanceller = new CancellationTokenSource();
                     CancellationToken _connectionCancellerToken = _connectionCanceller.Token;
-                    BTransportWS xport = new BTransportWS(socket, _connectionCancellerToken, pLogger);
-                    pProcessor(xport, _connectionCanceller, _params);
+                    BTransportWS xport = new BTransportWS(socket, _connectionCancellerToken, logger);
+                    connectionProcessor(xport, _connectionCanceller);
                 });
-            }, pCancellerSource.Token);
+            }, cancellerSource.Token);
         }
 
     }

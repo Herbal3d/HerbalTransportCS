@@ -38,8 +38,7 @@ namespace org.herbal3d.transport {
 
     // When setup to listen for a network connection, this is called when a new connection is received
     public delegate void BTransportConnectionAcceptedProcessor(BTransport pTransport,
-                                                    CancellationTokenSource pCanceller,
-                                                    ParamBlock pListenerParams);
+                                                    CancellationTokenSource pCanceller);
 
     public abstract class BTransport {
         // The transport has a state.
