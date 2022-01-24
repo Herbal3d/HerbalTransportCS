@@ -33,10 +33,12 @@ namespace org.herbal3d.transport {
         protected BProtocolReceptionCallback _receptionCallback;
         protected object _receptionCallbackContext;
 
-        protected BTransport _transport;
+        public BTransport Transport;
+        public BLogger Log;
 
-        public BProtocol(BTransport pTransport) {
-            _transport = pTransport;
+        public BProtocol(BTransport pTransport, BLogger pLogger) {
+            Transport = pTransport;
+            Log = pLogger;
         }
 
         /*

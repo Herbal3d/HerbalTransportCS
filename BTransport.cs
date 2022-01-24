@@ -40,6 +40,16 @@ namespace org.herbal3d.transport {
     public delegate void BTransportConnectionAcceptedProcessor(BTransport pTransport,
                                                     CancellationTokenSource pCanceller);
 
+    // Parent class of parameter blocks for the different types of transport
+    public abstract class BTransportParams {
+        public bool preferred = false;
+        public string transport = "UNKNOWN";
+        public string protocol = "UNKNOWN";
+        public int port = 11440;
+
+        public abstract string ExternalURL(string pExternalHostname);
+    }
+
     public abstract class BTransport {
         // The transport has a state.
         // Note that changing the state will invoke "OnStateChange".

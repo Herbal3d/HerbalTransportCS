@@ -236,7 +236,9 @@ namespace org.herbal3d.transport {
         // Fills the op for the response and the RPC response code.
         public static BMessage MakeResponse(BMessage pReq) {
             BMessage msg = new BMessage();
-            msg.Op = (uint)BasilConnection.RespFromReq[(BMessageOps)pReq.Op];
+            BMessageOps responseCode = BMessageOps.UnknownReq;
+            BasilConnection.RespFromReq.TryGetValue((BMessageOps)pReq.Op, out responseCode);
+            msg.Op = (uint)responseCode;
             // Move the RPC id code sent to the RPC response code
             if (pReq.SCode is string && pReq.SCode.Length > 0) {
                 msg.RCode = pReq.SCode;

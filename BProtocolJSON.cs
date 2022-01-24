@@ -13,12 +13,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 using org.herbal3d.b.protocol;
 using org.herbal3d.cs.CommonUtil;
 
+using Newtonsoft.Json;
 
 namespace org.herbal3d.transport {
     /**
@@ -26,7 +25,17 @@ namespace org.herbal3d.transport {
      */
 
     public class BProtocolJSON : BProtocol {
-        public BProtocolJSON(ParamBlock pParams, BTransport pTransport) : base(pTransport) {
+
+        // format of the JSON that is sent.
+        JsonSerializerSettings serializeSettings = new JsonSerializerSettings() {
+            // Don't send objects that have a value 'null'
+            NullValueHandling = NullValueHandling.Ignore
+        };
+
+        public BProtocolJSON(ParamBlock pParams,
+                            BTransport pTransport,
+                            BLogger pLogger) : base(pTransport, pLogger) {
+
             // set up to receive messages
             pTransport.OnMsg += BProtocolJSON.ProcessOnMsg;
             pTransport.ReceptionCallbackContext = this;
@@ -39,8 +48,9 @@ namespace org.herbal3d.transport {
 
         public override void Send(BMessage pData) {
             // convert the BMessage to JSON buffer
-            string asJSON = JsonSerializer.Serialize(pData);
-            _transport?.Send(Encoding.ASCII.GetBytes(asJSON));
+            string asJSON = JsonConvert.SerializeObject(pData, serializeSettings);
+            Log.Debug("BProtocolJSON.Send: Sending {0}", asJSON);
+            Transport?.Send(Encoding.UTF8.GetBytes(asJSON));
         }
 
         public override void Start(ParamBlock pParams) {
@@ -49,23 +59,30 @@ namespace org.herbal3d.transport {
 
         private static void ProcessOnStateChange(BTransport pTransport, BTransportConnectionStates pState, object pContext) {
             BProtocolJSON caller = pContext as BProtocolJSON;
+            caller.Log.Debug("BProtocolJSON.ProcessOnStateChange: ");
         }
 
         private static void ProcessOnMsg(BTransport pTransport, byte[] pData, object pContext) {
             BProtocolJSON caller = pContext as BProtocolJSON;
+
             BMessage bmsg;
 
             // convert received buffer from JSON into a BMessage
             try {
-                bmsg = JsonSerializer.Deserialize<BMessage>(pData);
+                var stringData = System.Text.Encoding.UTF8.GetString(pData);
+                bmsg = JsonConvert.DeserializeObject<BMessage>(stringData);
+                caller.Log.Debug("BProtocolJSON.ProcessOnMsg: received bmsg={0}", bmsg.ToString());
             }
             catch (Exception ee) {
-                throw new Exception("Failure to parse incoming BMessage: {0}", ee);
+                throw new Exception(String.Format("Failure to parse incoming BMessage: {0}", ee.Message));
             }
 
             // Give the buffer to our caller
             if (bmsg != null) {
                 caller._receptionCallback?.Invoke(bmsg, caller._receptionCallbackContext, caller);
+            }
+            else {
+                caller.Log.Debug("BProtocolJSON.ProcessOnMsg: Received message but not parsed");
             }
         }
     }

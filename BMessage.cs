@@ -11,6 +11,7 @@
 // limitations under the License.
 
 using System;
+using System.Text;
 using System.Collections.Generic;
 
 namespace org.herbal3d.b.protocol {
@@ -102,5 +103,36 @@ namespace org.herbal3d.b.protocol {
         // No error is 'exception' being undefined.
         public string Exception;
         public Dictionary<string, string> ExceptionHints;
+
+        public override string ToString() {
+            var buff = new StringBuilder();
+            buff.Append(String.Format("Op={0}", Op));
+            if (SCode != null && SCode.Length != 0) {
+                buff.Append(String.Format(", SC={0}", SCode));
+            }
+            if (RCode != null && RCode.Length != 0) {
+                buff.Append(String.Format(", RC={0}", RCode));
+            }
+            if (ResponseKey != null && ResponseKey.Length != 0) {
+                buff.Append(String.Format(", RKey={0}", ResponseKey));
+            }
+            if (Auth != null && Auth.Length != 0) {
+                buff.Append(String.Format(", Auth={0}", Auth));
+            }
+            if (IId != null && IId.Length != 0) {
+                buff.Append(String.Format(", IId={0}", IId));
+            }
+            if (IProps != null && IProps.Count != 0) {
+                buff.Append(String.Format(", IProp=["));
+                foreach (var kvp in IProps) {
+                    buff.Append(String.Format("{0}={1},", kvp.Key, kvp.Value));
+                }
+                buff.Append(String.Format("]"));
+            }
+            if (Exception != null && Exception.Length != 0) {
+                buff.Append(String.Format(", Except={0}", Exception));
+            }
+            return buff.ToString();
+        }
     }
 }

@@ -23,6 +23,27 @@ using Fleck;
 
 namespace org.herbal3d.transport {
 
+    // Parameters used to listen for WebSocket connections
+    public class BTransportWSParams : BTransportParams {
+        public bool isSecure = false;
+        public string bindHost = "0.0.0.0";
+        public string certificate = null;
+        public bool disableNaglesAlgorithm = false;
+        public readonly string defaultProtocolPrefix = "ws:";
+        public readonly string secureProtocolPrefix = "wss:";
+
+        public BTransportWSParams(): base() {
+            transport = "WS";
+            protocol = "Basil-JSON";
+            port = 11440;
+        }
+
+        public override string ExternalURL(string pExternalHostname) {
+            return isSecure ? secureProtocolPrefix : defaultProtocolPrefix
+                        + "//" + pExternalHostname + ":" + port.ToString();
+        }
+    }
+
     public class BTransportWS : BTransport {
 
         private static readonly string _logHeader = "[BTransportWS]";
@@ -35,7 +56,10 @@ namespace org.herbal3d.transport {
          * Transport for receiving and sending via WebSockets.
          * Receives a text or binary blob and passes it up the a BProtocol for translation.
          */
-        public BTransportWS(IWebSocketConnection pSocket, CancellationToken pCanceller, BLogger pLogger): base(pLogger) {
+        public BTransportWS(IWebSocketConnection pSocket,
+                            CancellationToken pCanceller,
+                            BLogger pLogger): base(pLogger) {
+
             _connection = pSocket;
             _overallCancellation = pCanceller;
 
@@ -52,6 +76,7 @@ namespace org.herbal3d.transport {
                 throw new Exception("BTransportWS.constructor: OverallCancellation parameter null");
             }
             StartInputAndOutputQueueTasks();
+            _log.Debug("{0} Connection created {1}", _logHeader, ConnectionName);
         }
 
         public override void Close() {
@@ -82,7 +107,7 @@ namespace org.herbal3d.transport {
             if (ConnectionState == BTransportConnectionStates.INITIALIZING) {
                 ConnectionState = BTransportConnectionStates.OPEN;
                 base.OnOpened();
-                _log.Debug("{0} Connection_OnOpen: connection state to OPEN");
+                _log.Debug("{0} Connection_OnOpen: connection state to OPEN", _logHeader);
             }
             else {
                 ConnectionState = BTransportConnectionStates.ERROR;
@@ -96,11 +121,12 @@ namespace org.herbal3d.transport {
         private void Connection_OnClose() {
             ConnectionState = BTransportConnectionStates.CLOSED;
             base.OnClosed();
-            _log.Debug("{0} Connection_OnClose: connection state to CLOSED");
+            _log.Debug("{0} Connection_OnClose: connection state to CLOSED", _logHeader);
         }
 
         private void Connection_OnMessage(string pMsg) {
             if (IsConnected()) {
+                _log.Debug("{0} Connection_OnMessage: ", _logHeader);
                 _receiveQueue.Add(Encoding.ASCII.GetBytes(pMsg));
             }
         }
@@ -120,15 +146,10 @@ namespace org.herbal3d.transport {
         // For each connection received, a new BTransportWS is created and
         //    passed to the BTransportConnectionAcceptedProcesssor.
         public static Task ConnectionListener(
-                            bool isSecure,
-                            string connectionURL,
-                            string secureConnectionURL,
-                            string certificate,
+                            BTransportWSParams param,
                             BTransportConnectionAcceptedProcessor connectionProcessor,
                             CancellationTokenSource cancellerSource,
-                            BLogger logger,
-                            bool disableNaglesAlgorithm = true,
-                            string externalAccessHostname = ""
+                            BLogger logger
                             ) {
 
             return Task.Run(() => {
@@ -156,11 +177,17 @@ namespace org.herbal3d.transport {
                 };
                 */
 
+                // Build up the connection string needed for WS listen binding
+                // Note: this is different than external connection URL as it needs the transport
+                //     refix, the bind host and the port.
+                string connectionURL = param.isSecure ? param.secureProtocolPrefix : param.defaultProtocolPrefix
+                        + "//" + param.bindHost + ":" + param.port.ToString();
+
                 // For debugging, it is possible to set up a non-encrypted connection
-                if (connectionURL.StartsWith("wss:")) {
+                if (param.isSecure) {
                     logger.Debug("{0} Creating secure server on {1}", _logHeader, connectionURL);
                     _server = new WebSocketServer(connectionURL) {
-                        Certificate = new X509Certificate2(certificate),
+                        Certificate = new X509Certificate2(param.certificate),
                         EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
                     };
                 }
@@ -170,8 +197,7 @@ namespace org.herbal3d.transport {
                 }
 
                 // Disable the ACK delay for better responsiveness
-                if (disableNaglesAlgorithm) {
-                    logger.Debug("{0} Disabling Nagles algorightm", _logHeader);
+                if (param.disableNaglesAlgorithm) {
                     _server.ListenerSocket.NoDelay = true;
                 }
 
