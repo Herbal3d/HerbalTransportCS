@@ -50,7 +50,9 @@ namespace org.herbal3d.transport {
             _receptionCallbackContext = pContext;
         }
 
-        public abstract void Start(ParamBlock pParams);
+        public virtual void Start() {
+            Transport.Start();
+        }
 
         public abstract void Close();
 

@@ -25,8 +25,6 @@ namespace org.herbal3d.transport {
     public delegate void RejectionCallback(string pErrorMsg);
     public class RPCInfo {
         public DateTime timeRPCCreated;
-        public ResolutionCallback resolve;
-        public RejectionCallback reject;
         public string session;          // unique number used to link response
         public BasilConnection context; // A handle back to the connection instance
         // Task completion object that is holding the context for the reply.
@@ -71,13 +69,22 @@ namespace org.herbal3d.transport {
         }
     }
 
+    public enum BConnectionStates {
+        INITIALIZING,
+        OPEN,
+        CLOSING,
+        ERROR,
+        CLOSED
+    };
+
     public class BasilConnection {
-        private readonly ParamBlock _params;
-        private readonly BProtocol _protocol;
         private readonly BLogger _log;
 
+        private readonly BProtocol _protocol;
         private OSAuthToken _incomingAuth;
         private OSAuthToken _outgoingAuth;
+
+        private BConnectionStates _state;
 
         public readonly Dictionary<string, RPCInfo> _rpcSessions = new Dictionary<string, RPCInfo>();
 
@@ -105,12 +112,63 @@ namespace org.herbal3d.transport {
             _processOp = pProcessor;
         }
 
-        public void Start(ParamBlock pParams) {
+        public void Start() {
+            // Watch the transport state and change our state to that
+            _protocol.Transport.OnStateChange += watchTransportState;
+            _protocol.Start();
             return;
         }
 
+        // When transport state changes, my state changes
+        private void watchTransportState(BTransport pXport, BTransportConnectionStates pNewState, object pContext) {
+            BasilConnection me = pContext as BasilConnection;
+            if (me != null) {
+                me._log.Debug("BasilConnection.watchTransportState: newState = {0}", pNewState);
+            }
+        }
+
         public void Send(BMessage pMsg) {
+            if (pMsg.Auth == null && _outgoingAuth != null) {
+                pMsg.Auth = _outgoingAuth.Token;
+            }
             _protocol?.Send(pMsg);
+        }
+
+        private Dictionary<BConnectionStates, BTransportConnectionStates> mapConnectionStateToTransportState
+            = new Dictionary<BConnectionStates, BTransportConnectionStates>() {
+                { BConnectionStates.INITIALIZING,  BTransportConnectionStates.INITIALIZING },
+                { BConnectionStates.OPEN,          BTransportConnectionStates.OPEN },
+                { BConnectionStates.CLOSING,       BTransportConnectionStates.CLOSING },
+                { BConnectionStates.ERROR,         BTransportConnectionStates.ERROR },
+                { BConnectionStates.CLOSED,        BTransportConnectionStates.CLOSED },
+            };
+        private Dictionary<BTransportConnectionStates, BConnectionStates> mapTransportStateToConnectionState 
+            = new Dictionary<BTransportConnectionStates, BConnectionStates>() {
+                { BTransportConnectionStates.INITIALIZING,  BConnectionStates.INITIALIZING },
+                { BTransportConnectionStates.OPEN,          BConnectionStates.OPEN },
+                { BTransportConnectionStates.CLOSING,       BConnectionStates.CLOSING },
+                { BTransportConnectionStates.ERROR,         BConnectionStates.ERROR },
+                { BTransportConnectionStates.CLOSED,        BConnectionStates.CLOSED },
+            };
+        public BConnectionStates getState() {
+            var transportState = _protocol.Transport.ConnectionState;
+            return mapTransportStateToConnectionState[transportState];
+        }
+
+        private List<TaskCompletionSource<bool>> _readyWaiters = new List<TaskCompletionSource<bool>>();
+        public Task<bool> WhenReady() {
+            TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
+            if (getState() == BConnectionStates.OPEN) {
+                // If already OPEN, return the task in RunToCompletion state
+                tcs.SetResult(true);
+            }
+            else {
+                // if not OPEN, queue the waiting task (in case there are several waiters)
+                lock (_readyWaiters) {
+                    _readyWaiters.Add(tcs);
+                }
+            }
+            return tcs.Task;
         }
 
         public Task<BMessage> CreateItem(ParamBlock pProps) {
@@ -161,10 +219,10 @@ namespace org.herbal3d.transport {
             return SendAndPromiseResponse(bmsg, this);
         }
 
-        public Task<BMessage> MakeConnection(ParamBlock pProps) {
+        public Task<BMessage> MakeConnection(Dictionary<string,string> pProps) {
             BMessage bmsg = new BMessage() { Op = (uint)BMessageOps.MakeConnectionReq };
             if (_outgoingAuth != null) bmsg.Auth = _outgoingAuth.Token;
-            bmsg.IProps = pProps == null ? new Dictionary<string, string>() : CreatePropertyList(pProps);
+            bmsg.IProps = pProps == null ? new Dictionary<string, string>() : pProps;
             return SendAndPromiseResponse(bmsg, this);
         }
 
@@ -189,7 +247,7 @@ namespace org.herbal3d.transport {
                     }
                     catch (Exception e) {
                         string errMsg = String.Format("BasilConnection.Processor: exception setting result: {0}", e);
-                        session.reject(errMsg);
+                        session.taskCompletion.SetException(new Exception(errMsg));
                     }
                 }
             }

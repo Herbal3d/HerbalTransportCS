@@ -37,8 +37,8 @@ namespace org.herbal3d.transport {
                             BLogger pLogger) : base(pTransport, pLogger) {
 
             // set up to receive messages
-            pTransport.OnMsg += BProtocolJSON.ProcessOnMsg;
-            pTransport.ReceptionCallbackContext = this;
+            pTransport.SetReceiveCallback(ProcessOnMsg, this);
+
             pTransport.OnStateChange += BProtocolJSON.ProcessOnStateChange;
         }
 
@@ -53,13 +53,14 @@ namespace org.herbal3d.transport {
             Transport?.Send(Encoding.UTF8.GetBytes(asJSON));
         }
 
-        public override void Start(ParamBlock pParams) {
-            throw new NotImplementedException();
-        }
+        // public override void Start() {
+        // }
 
         private static void ProcessOnStateChange(BTransport pTransport, BTransportConnectionStates pState, object pContext) {
             BProtocolJSON caller = pContext as BProtocolJSON;
-            caller.Log.Debug("BProtocolJSON.ProcessOnStateChange: ");
+            if (caller != null) {
+                // caller.Log.Debug("BProtocolJSON.ProcessOnStateChange: {0}", pState);
+            }
         }
 
         private static void ProcessOnMsg(BTransport pTransport, byte[] pData, object pContext) {

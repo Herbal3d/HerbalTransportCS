@@ -32,9 +32,10 @@ namespace org.herbal3d.transport {
 
     public delegate void BTransportOnStateChangeCallback(BTransport pTransport, BTransportConnectionStates pNewState, object pContext);
     public delegate void BTransportOnOpenCallback(BTransport pTransport);
-    public delegate void BTransportOnMsgCallback(BTransport pTransport, byte[] pMsg, object pContext);
     public delegate void BTransportOnCloseCallback(BTransport pTransport);
     public delegate void BTransportOnErrorCallback(BTransport pTransport);
+
+    public delegate void BTransportReceptionCallback(BTransport pTransport, byte[] pMsg, object pContext);
 
     // When setup to listen for a network connection, this is called when a new connection is received
     public delegate void BTransportConnectionAcceptedProcessor(BTransport pTransport,
@@ -66,16 +67,12 @@ namespace org.herbal3d.transport {
 
         public event BTransportOnStateChangeCallback OnStateChange;
         public event BTransportOnOpenCallback OnOpen;
-        public event BTransportOnMsgCallback OnMsg;
         public event BTransportOnCloseCallback OnClose;
         public event BTransportOnErrorCallback OnError;
 
-        // The "OnMsg" callback has an extra parameter that the caller can
-        //    use to keep context. This presumes only one caller.
+        // callback and context when a message is received
+        protected BTransportReceptionCallback _receptionCallback;
         protected object _receptionCallbackContext;
-        public object ReceptionCallbackContext {
-            set { _receptionCallbackContext = value; }
-        }
 
         protected BlockingCollection<byte[]> _receiveQueue;
         protected BlockingCollection<byte[]> _sendQueue;
@@ -95,7 +92,16 @@ namespace org.herbal3d.transport {
             _sendQueue = new BlockingCollection<byte[]>(new ConcurrentQueue<byte[]>());
         }
 
-        public virtual void Start(ParamBlock pParams) {
+        /*
+         * Set the function called when a message is received.
+         * The "context" is passed so the called function can have the class instance that asked for the message
+         */
+        public void SetReceiveCallback(BTransportReceptionCallback pCallback, object pContext) {
+            _receptionCallback = pCallback;
+            _receptionCallbackContext = pContext;
+        }
+
+        public virtual void Start() {
         }
 
         public abstract void Close();
@@ -117,20 +123,22 @@ namespace org.herbal3d.transport {
             cb?.Invoke(this, _connectionState, _receptionCallbackContext);
         }
         protected virtual void OnOpened() {
+            ConnectionState = BTransportConnectionStates.OPEN;
             BTransportOnOpenCallback cb = OnOpen;
             cb?.Invoke(this);
+            OnStateChanged();
         }
         protected virtual void OnClosed() {
+            ConnectionState = BTransportConnectionStates.CLOSED;
             BTransportOnCloseCallback cb = OnClose;
             cb?.Invoke(this);
-        }
-        protected virtual void OnMsged(byte[] pMsg) {
-            BTransportOnMsgCallback cb = OnMsg;
-            cb?.Invoke(this, pMsg, _receptionCallbackContext);
+            OnStateChanged();
         }
         protected virtual void OnErrored() {
+            ConnectionState = BTransportConnectionStates.ERROR;
             BTransportOnErrorCallback cb = OnError;
             cb?.Invoke(this);
+            OnStateChanged();
         }
 
     }

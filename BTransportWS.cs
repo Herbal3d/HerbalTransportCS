@@ -52,6 +52,9 @@ namespace org.herbal3d.transport {
         private WebSocketServer _server;
         private IWebSocketConnection _connection;
 
+        private Task _inputQueueTask;
+        private Task _outputQueueTask;
+
         /**
          * Transport for receiving and sending via WebSockets.
          * Receives a text or binary blob and passes it up the a BProtocol for translation.
@@ -75,25 +78,29 @@ namespace org.herbal3d.transport {
             if (_overallCancellation == null) {
                 throw new Exception("BTransportWS.constructor: OverallCancellation parameter null");
             }
+            // _log.Debug("{0} Connection created {1}", _logHeader, ConnectionName);
+        }
+
+        public override void Start() {
+            base.Start();
             StartInputAndOutputQueueTasks();
-            _log.Debug("{0} Connection created {1}", _logHeader, ConnectionName);
         }
 
         public override void Close() {
-            throw new NotImplementedException();
         }
 
         private void StartInputAndOutputQueueTasks() {
             // Tasks to push and pull from the input and output queues.
-            // These tasks are created here so the context will be this object instance rather than
-            //     creating the tasks in the OnOpen event context.
-            Task.Run(() => {
+            BTransport hostingTransport = this;
+            _inputQueueTask = Task.Run(() => {
                 while (!_overallCancellation.IsCancellationRequested) {
                     byte[] msg = _receiveQueue.Take();
-                    base.OnMsged(msg);
+                    if (_receptionCallback != null) {
+                        _receptionCallback(hostingTransport, msg, _receptionCallbackContext);
+                    }
                 }
             }, _overallCancellation);
-            Task.Run(() => {
+            _inputQueueTask = Task.Run(() => {
                 while (!_overallCancellation.IsCancellationRequested) {
                     byte[] msg = _sendQueue.Take();
                     _connection.Send(msg);
@@ -104,41 +111,32 @@ namespace org.herbal3d.transport {
         // A WebSocket connection has been made.
         // Initialized the message processors.
         private void Connection_OnOpen() {
-            if (ConnectionState == BTransportConnectionStates.INITIALIZING) {
-                ConnectionState = BTransportConnectionStates.OPEN;
-                base.OnOpened();
-                _log.Debug("{0} Connection_OnOpen: connection state to OPEN", _logHeader);
-            }
-            else {
-                ConnectionState = BTransportConnectionStates.ERROR;
-                base.OnStateChanged();
-                _log.Error("{0} OnOpen event on {1} when connection not initializing",
-                        _logHeader, ConnectionName);
-            }
+            base.OnOpened();
+            // _log.Debug("{0} Connection_OnOpen: connection state to OPEN", _logHeader);
         }
 
         // The WebSocket connection is closed. Any application state is out-of-luck
         private void Connection_OnClose() {
-            ConnectionState = BTransportConnectionStates.CLOSED;
             base.OnClosed();
-            _log.Debug("{0} Connection_OnClose: connection state to CLOSED", _logHeader);
+            // _log.Debug("{0} Connection_OnClose: connection state to CLOSED", _logHeader);
         }
 
         private void Connection_OnMessage(string pMsg) {
             if (IsConnected()) {
-                _log.Debug("{0} Connection_OnMessage: ", _logHeader);
+                // _log.Debug("{0} Connection_OnMessage: cn={1}", _logHeader, ConnectionName);
                 _receiveQueue.Add(Encoding.ASCII.GetBytes(pMsg));
             }
         }
 
         private void Connection_OnBinary(byte [] pMsg) {
             if (IsConnected()) {
+                // _log.Debug("{0} Connection_OnBinary: cn={1}", _logHeader, ConnectionName);
                 _receiveQueue.Add(pMsg);
             }
         }
 
         private void Connection_OnError(Exception pExcept) {
-            ConnectionState = BTransportConnectionStates.ERROR;
+            base.OnErrored();
             _log.Error("{0} OnError event on {1}: {2}", _logHeader, ConnectionName, pExcept);
         }
             
@@ -151,6 +149,9 @@ namespace org.herbal3d.transport {
                             CancellationTokenSource cancellerSource,
                             BLogger logger
                             ) {
+
+            BTransportParams _params = param;
+            BTransportConnectionAcceptedProcessor _connectionProcessor = connectionProcessor;
 
             return Task.Run(() => {
                 WebSocketServer _server;
@@ -185,14 +186,14 @@ namespace org.herbal3d.transport {
 
                 // For debugging, it is possible to set up a non-encrypted connection
                 if (param.isSecure) {
-                    logger.Debug("{0} Creating secure server on {1}", _logHeader, connectionURL);
+                    // logger.Debug("{0} Creating secure server on {1}", _logHeader, connectionURL);
                     _server = new WebSocketServer(connectionURL) {
                         Certificate = new X509Certificate2(param.certificate),
                         EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
                     };
                 }
                 else {
-                    logger.Debug("{0} Creating insecure server on {1}", _logHeader, connectionURL);
+                    // logger.Debug("{0} Creating insecure server on {1}", _logHeader, connectionURL);
                     _server = new WebSocketServer(connectionURL);
                 }
 
@@ -202,11 +203,11 @@ namespace org.herbal3d.transport {
                 }
 
                 _server.Start(socket => {
-                    // Context.Log.DebugFormat("{0} Received WebSocket connection", _logHeader);
+                    // logger.Debug("{0} Received WebSocket connection for port {1}", _logHeader, _params.port);
                     CancellationTokenSource _connectionCanceller = new CancellationTokenSource();
                     CancellationToken _connectionCancellerToken = _connectionCanceller.Token;
                     BTransportWS xport = new BTransportWS(socket, _connectionCancellerToken, logger);
-                    connectionProcessor(xport, _connectionCanceller);
+                    _connectionProcessor(xport, _connectionCanceller);
                 });
             }, cancellerSource.Token);
         }
