@@ -76,7 +76,7 @@ namespace org.herbal3d.b.protocol {
     public class BMessage {
         public BMessage(BMessageOps pOp = BMessageOps.UnknownReq) {
             Op = (uint)pOp;
-            IProps = new Dictionary<string, string>();
+            IProps = new Dictionary<string, object>();
         }
         // Header for tracking and response (RCP) linkage
         public string SCode;        // unique value to tie a response to a request
@@ -93,7 +93,7 @@ namespace org.herbal3d.b.protocol {
         // The operation
         public uint Op;             // the operation to perform
         public string IId;          // item referenced by this operation
-        public Dictionary<string, string> IProps;       // authorization for the session
+        public Dictionary<string, object> IProps;       // authorization for the session
         public string Auth;         // authorization for the referenced item
         public string IAuth;        // authorization for the referenced item
 

@@ -174,7 +174,7 @@ namespace org.herbal3d.transport {
         public Task<BMessage> CreateItem(ParamBlock pProps) {
             BMessage bmsg = new BMessage() { Op = (uint)BMessageOps.CreateItemReq };
             if (_outgoingAuth != null) bmsg.Auth = _outgoingAuth.Token;
-            bmsg.IProps = pProps == null ? new Dictionary<string, string>() : CreatePropertyList(pProps);
+            bmsg.IProps = pProps == null ? new Dictionary<string, object>() : CreatePropertyList(pProps);
             return SendAndPromiseResponse(bmsg, this);
         }
 
@@ -182,7 +182,7 @@ namespace org.herbal3d.transport {
             BMessage bmsg = new BMessage() { Op = (uint)BMessageOps.DeleteItemReq };
             if (_outgoingAuth != null) bmsg.Auth = _outgoingAuth.Token;
             bmsg.IId = pItemId;
-            bmsg.IProps = new Dictionary<string, string>();
+            bmsg.IProps = new Dictionary<string, object>();
             if (pItemAuth != null) bmsg.IAuth = pItemAuth.Token;
             return SendAndPromiseResponse(bmsg, this);
         }
@@ -191,7 +191,7 @@ namespace org.herbal3d.transport {
             BMessage bmsg = new BMessage() { Op = (uint)BMessageOps.AddAbilityReq };
             if (_outgoingAuth != null) bmsg.Auth = _outgoingAuth.Token;
             bmsg.IId = pItemId;
-            bmsg.IProps = pProps == null ? new Dictionary<string, string>() : CreatePropertyList(pProps);
+            bmsg.IProps = pProps == null ? new Dictionary<string, object>() : CreatePropertyList(pProps);
             return SendAndPromiseResponse(bmsg, this);
         }
 
@@ -199,7 +199,7 @@ namespace org.herbal3d.transport {
             BMessage bmsg = new BMessage() { Op = (uint)BMessageOps.RemoveAbilityReq };
             if (_outgoingAuth != null) bmsg.Auth = _outgoingAuth.Token;
             bmsg.IId = pItemId;
-            bmsg.IProps = pProps == null ? new Dictionary<string, string>() : CreatePropertyList(pProps);
+            bmsg.IProps = pProps == null ? new Dictionary<string, object>() : CreatePropertyList(pProps);
             return SendAndPromiseResponse(bmsg, this);
         }
 
@@ -207,7 +207,7 @@ namespace org.herbal3d.transport {
             BMessage bmsg = new BMessage() { Op = (uint)BMessageOps.RequestPropertiesReq };
             if (_outgoingAuth != null) bmsg.Auth = _outgoingAuth.Token;
             bmsg.IId = pItemId;
-            bmsg.IProps = pFilter == null ? new Dictionary<string, string>() : new Dictionary<string, string>() { { "Filter", pFilter } };
+            bmsg.IProps = pFilter == null ? new Dictionary<string, object>() : new Dictionary<string, object>() { { "Filter", pFilter } };
             return SendAndPromiseResponse(bmsg, this);
         }
 
@@ -215,15 +215,18 @@ namespace org.herbal3d.transport {
             BMessage bmsg = new BMessage() { Op = (uint)BMessageOps.UpdatePropertiesReq };
             if (_outgoingAuth != null) bmsg.Auth = _outgoingAuth.Token;
             bmsg.IId = pItemId;
-            bmsg.IProps = pProps == null ? new Dictionary<string, string>() : CreatePropertyList(pProps);
+            bmsg.IProps = pProps == null ? new Dictionary<string, object>() : CreatePropertyList(pProps);
             return SendAndPromiseResponse(bmsg, this);
         }
 
-        public Task<BMessage> MakeConnection(Dictionary<string,string> pProps) {
+        public Task<BMessage> MakeConnection(Dictionary<string,object> pProps) {
             BMessage bmsg = new BMessage() { Op = (uint)BMessageOps.MakeConnectionReq };
             if (_outgoingAuth != null) bmsg.Auth = _outgoingAuth.Token;
-            bmsg.IProps = pProps == null ? new Dictionary<string, string>() : pProps;
+            bmsg.IProps = pProps == null ? new Dictionary<string, object>() : pProps;
             return SendAndPromiseResponse(bmsg, this);
+        }
+        public Task<BMessage> MakeConnection(ParamBlock pProps) {
+            return MakeConnection(pProps.Params);
         }
 
         // Process a received message from the protocol processor.
@@ -258,10 +261,10 @@ namespace org.herbal3d.transport {
 
         // Convert the passed set of parameters into the <string,string> structure that's
         //    send in the BMessage.
-        private Dictionary<string, string> CreatePropertyList(ParamBlock pProps) {
-            Dictionary<string, string> ret = new Dictionary<string, string>();
+        private Dictionary<string, object> CreatePropertyList(ParamBlock pProps) {
+            Dictionary<string, object> ret = new Dictionary<string, object>();
             foreach (var kvp in pProps.Params) {
-                ret.Add(kvp.Key, kvp.Value.ToString());
+                ret.Add(kvp.Key, kvp.Value);
             }
             return ret;
         }
