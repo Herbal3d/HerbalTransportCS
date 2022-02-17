@@ -123,11 +123,11 @@ namespace org.herbal3d.b.protocol {
                 buff.Append(String.Format(", IId={0}", IId));
             }
             if (IProps != null && IProps.Count != 0) {
-                buff.Append(String.Format(", IProp=["));
+                buff.Append(", IProp={");
                 foreach (var kvp in IProps) {
                     buff.Append(String.Format("{0}={1},", kvp.Key, kvp.Value));
                 }
-                buff.Append(String.Format("]"));
+                buff.Append("}");
             }
             if (Exception != null && Exception.Length != 0) {
                 buff.Append(String.Format(", Except={0}", Exception));

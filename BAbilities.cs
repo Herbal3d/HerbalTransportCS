@@ -37,7 +37,7 @@ namespace org.herbal3d.b.protocol {
     // Collect Abilities into a ParamBlock
     // This also creates an "Abilities" property with the names of the added abilities.
     public class AbilityList : ParamBlock {
-        public static string AbilitiesProp = "Abilities";
+        public static string AbilitiesProp = "abilities";
 
         public AbilityList() : base() {
         }
@@ -76,9 +76,9 @@ namespace org.herbal3d.b.protocol {
     /// These are usually read and cannot be written.
     /// </summary>
     public class AbilityBItem : AbilityBase {
-        public static string IdProp = "Id";
-        public static string LayerProp = "Layer";
-        public static string StateProp = "State";
+        public static string IdProp = "id";
+        public static string LayerProp = "layer";
+        public static string StateProp = "state";
 
         public const string AbilityName = "BItem";
         public override string Name { get { return AbilityName; } }
@@ -114,10 +114,10 @@ namespace org.herbal3d.b.protocol {
     }
 
     public class AbilityAssembly : AbilityBase {
-        public static string AssetURLProp = "AssetURL";
-        public static string AssetLoaderProp = "AssetLoader";
-        public static string AssetAuthProp = "AssetAuth";
-        public static string AssetRepresentationProp = "AssetRepresentation";
+        public static string AssetURLProp = "assetUrl";
+        public static string AssetLoaderProp = "assetLoader";
+        public static string AssetAuthProp = "assetAuth";
+        public static string AssetRepresentationProp = "assetRepresentation";
 
         public const string AbilityName = "Assembly";
         public override string Name { get { return AbilityName; } }
@@ -167,11 +167,11 @@ namespace org.herbal3d.b.protocol {
         }
     }
     public class AbilityInstance : AbilityBase {
-        public static string RefItemProp = "RefItem"; // either 'SELF' or id of BItem with the geometry
-        public static string PosProp = "Pos";
-        public static string RotProp = "Rot";
-        public static string PosRefProp = "PosRef";
-        public static string RotRefProp = "RotRef";
+        public static string RefItemProp = "refItem"; // either 'SELF' or id of BItem with the geometry
+        public static string PosProp = "pos";
+        public static string RotProp = "rot";
+        public static string PosRefProp = "posRef";
+        public static string RotRefProp = "rotRef";
 
         public const string AbilityName = "Instance";
         public override string Name { get { return AbilityName; } }

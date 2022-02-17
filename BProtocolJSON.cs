@@ -18,6 +18,7 @@ using org.herbal3d.b.protocol;
 using org.herbal3d.cs.CommonUtil;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace org.herbal3d.transport {
     /**
@@ -63,14 +64,61 @@ namespace org.herbal3d.transport {
             }
         }
 
+        /* JSON parsing converter code. Discovered not needed but kept here as an example
+        /// <summary>
+        /// The BMessage has an IProps field which is a keyed collection of values.
+        /// Depending on the encoding of the message, the type of the values can be
+        ///     coded differently. Currently, the values are either a string or an array
+        ///     of doubles.
+        /// This class adds a parser for that case where we check the syntax of the
+        ///     value and return the correct type of value.
+        /// </summary>
+        private class IPropsConverter : JsonConverter {
+            public override bool CanConvert(Type objectType) {
+                DebugLogger.Debug("BProtocolJSON.IPropsConverter: CanConvert. type={0}", objectType.ToString());
+                return objectType == typeof(Dictionary<string,object>);
+            }
+            public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) {
+                DebugLogger.Debug("BProtocolJSON.IPropsConverter: ReadJson. type={0}, existing={1}",
+                            objectType.ToString(), JsonConvert.SerializeObject(existingValue, Formatting.None));
+                Dictionary<string,object> ret = new Dictionary<string, object>();
+                JObject packed = JObject.Load(reader);
+                if (packed != null) {
+                    DebugLogger.Debug("BProtocolJSON.IPropsConverter: packed token type = {0}", packed.GetType());
+                    foreach (var prop in packed.Properties()) {
+                        DebugLogger.Debug("BProtocolJSON.IPropsConverter: prop name = {0}", prop.Name);
+                        JToken val = prop.Value;
+                        if (val.Type == JTokenType.String) {
+                            DebugLogger.Debug("BProtocolJSON.IPropsConverter: string {0}={1}", prop.Name, (string)val);
+                            ret.Add(prop.Name, (string)val);
+                        }
+                        if (val.Type == JTokenType.Array) {
+                            JArray jArray = (JArray)val;
+                            double[] arrayValues = jArray.ToObject<List<double>>().ToArray();
+                            ret.Add(prop.Name, arrayValues);
+                        }
+                    }
+                }
+                DebugLogger.Debug("BProtocolJSON.IPropsConverter: returning ret size {0}", ret.Count);
+                return ret;
+            }
+
+            public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer) {
+                throw new NotImplementedException();
+            }
+        }
+        */
+
+        // static BLogger DebugLogger; // DEBUG DEBUG DEBUG Kludge so IPropsConverter can output debug messages
         private static void ProcessOnMsg(BTransport pTransport, byte[] pData, object pContext) {
             BProtocolJSON caller = pContext as BProtocolJSON;
+            // DebugLogger = caller.Log; // DEBUG DEBUG DEBUG
 
             BMessage bmsg;
 
             // convert received buffer from JSON into a BMessage
             try {
-                var stringData = System.Text.Encoding.UTF8.GetString(pData);
+                string stringData = System.Text.Encoding.UTF8.GetString(pData);
                 bmsg = JsonConvert.DeserializeObject<BMessage>(stringData);
                 caller.Log.Debug("BProtocolJSON.ProcessOnMsg: received bmsg={0}", bmsg.ToString());
             }
