@@ -1,0 +1,21 @@
+    <Project frameworkVersion="netstandard2_0"
+                name="Herbal3d.HerbalTransportCS"
+                path="addon-modules/HerbalTransportCS"
+                type="Library">
+
+      <Configuration>
+        <Options>
+          <OutputPath>../../bin/</OutputPath>
+          <RootNamespace>org.herbal3d.transport</RootNamespace>
+        </Options>
+      </Configuration>
+
+      <ReferencePath>../../bin/</ReferencePath>
+
+      <ProjectReference name="Herbal3d.CommonUtil" include="../HerbalCommonUtilCS/Herbal3d.CommonUtil.csproj"/>
+      <ProjectReference name="Herbal3d.OSAuth" include="../OSAuthModule/OSAuth/Herbal3d.OSAuth.csproj"/>
+
+      <PackageReference name="Fleck" version="1.2.0"/>
+      <PackageReference name="Newtonsoft.Json" version="13.0.1"/>
+
+    </Project>

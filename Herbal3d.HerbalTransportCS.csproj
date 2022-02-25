@@ -2,29 +2,22 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <BaseOutputPath>..\..\..\bin\</BaseOutputPath>
+    <AssemblyName>Herbal3d.HerbalTransportCS</AssemblyName>
   </PropertyGroup>
+
+  <PropertyGroup>
+    <OutputPath>..\..\bin\</OutputPath>
+    <RootNamespace>org.herbal3d.transport\</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../HerbalCommonUtilCS/Herbal3d.CommonUtil.csproj" />
+    <ProjectReference Include="../OSAuthModule/OSAuth/Herbal3d.OSAuth.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Fleck" Version="1.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\HerbalCommonUtilCS\Herbal3d.CommonUtil.csproj" />
-    <ProjectReference Include="..\OSAuthModule\OSAuth\Herbal3d.OSAuth.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Mono.Addins">
-      <HintPath>..\..\bin\Mono.Addins.dll</HintPath>
-    </Reference>
-    <Reference Include="log4net">
-      <HintPath>..\..\bin\log4net.dll</HintPath>
-    </Reference>
-    <Reference Include="Nini">
-      <HintPath>..\..\bin\Nini.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
