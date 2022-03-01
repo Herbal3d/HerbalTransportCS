@@ -183,19 +183,19 @@ namespace org.herbal3d.b.protocol {
             pMsg.IProps.TryGetValue(RefItemProp, out var refItem);
             return refItem as string;
         }
-        public double[] Pos {
+        public double[] WorldPos {
             get { return P<double[]>(PosProp); }
             set { SetParam(PosProp, value); }
         }
-        public static double[] GetPos(BMessage pMsg) {
+        public static double[] GetWorldPos(BMessage pMsg) {
             pMsg.IProps.TryGetValue(PosProp, out var pos);
             return pos as double[];
         }
-        public double[] Rot {
+        public double[] WorldRot {
             get { return P<double[]>(RotProp); }
             set { SetParam(RotProp, value); }
         }
-        public static double[] GetRot(BMessage pMsg) {
+        public static double[] GetWorldRot(BMessage pMsg) {
             pMsg.IProps.TryGetValue(RotProp, out var rot);
             return rot as double[];
         }

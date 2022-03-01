@@ -42,22 +42,24 @@ namespace org.herbal3d.b.protocol {
     }
 
     public enum CoordSystem {
-        WGS86 = 0,    // WGS84 earth coordinates
+        WGS86 = 0,     // WGS84 earth coordinates
         CAMERA = 1,    // Coordinates relative to camera position (-1..1 range, zero center)
-        CAMERAABS = 2,    // Absolute coordinates relative to the camera position (zero center)
-        VIRTUAL = 3,    // Zero based un-rooted coordinates
-        MOON = 4,    // Earth-moon coordinates
-        MARS = 5,    // Mars coordinates
-        REL1 = 6,    // Mutually agreed base coordinates
+        CAMERAABS = 2, // Absolute coordinates relative to the camera position (zero center)
+        VIRTUAL = 3,   // Zero based un-rooted coordinates
+        MOON = 4,      // Earth-moon coordinates
+        MARS = 5,      // Mars coordinates
+        REL1 = 6,      // Mutually agreed base coordinates
         REL2 = 7,
-        REL3 = 8
+        REL3 = 8,
+        REL = 40       // relative coordiate organized by AbilityFOR (REL+n)
     }
 
     public enum RotationSystem {
         WORLDR = 0,    // rotation is relative to world coordinates
         LOCALR = 1,    // rotation is relative to referened object
-        FORR = 2,    // rotation is relative to current frame of reference
-        CAMERAR = 3     // rotation is relative to the camera direction
+        FORR = 2,      // rotation is relative to current frame of reference
+        CAMERAR = 3,   // rotation is relative to the camera direction
+        REL = 40       // relative rotation organized by AbilityFOR (REL+n)
     }
 
     // Positions can be updated in mass. This is the per-item update information.
