@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <OutputPath>..\..\bin\</OutputPath>
+    <OutDir>..\..\bin\</OutDir>
     <RootNamespace>org.herbal3d.transport\</RootNamespace>
   </PropertyGroup>
 
