@@ -40,22 +40,20 @@ namespace org.herbal3d.b.protocol {
         public static string AbilitiesProp = "abilities";
 
         public AbilityList() : base() {
+            this.Add(AbilitiesProp, new string[] {});
         }
-        public string Abilities {
-            get { return P<string>(AbilitiesProp); }
+        public string[] Abilities {
+            get { return P<string[]>(AbilitiesProp); }
             set { SetParam(AbilitiesProp, value); }
         }
 
         public ParamBlock Add(AbilityBase pAbil) {
-            string abils = this.Abilities;
+            string[] abils = this.Abilities;
             // Add the new ability the the list of abilities
-            if (abils != null) {
-                abils += "," + pAbil.Name;
-            }
-            else {
-                abils = pAbil.Name;
-            }
-            this.Abilities = abils;
+            string[] moreAbils = new string[abils.Length + 1];
+            abils.CopyTo(moreAbils, 0);
+            moreAbils[abils.Length] = pAbil.Name;
+            this.Abilities = moreAbils;
             // Add the properties of the new ability
             foreach (var kvp in pAbil.Params) {
                 this.Add(kvp.Key, kvp.Value);
