@@ -153,62 +153,68 @@ namespace org.herbal3d.transport {
             BTransportParams _params = param;
             BTransportConnectionAcceptedProcessor _connectionProcessor = connectionProcessor;
 
+            // Do the listening async
             return Task.Run(() => {
-                WebSocketServer _server;
+                try {
+                    WebSocketServer _server;
 
-                FleckLog.Level = LogLevel.Info;
-                /*  Uncomment this if you want Fleck messages
-                //  Haven't been able to get FleckLog.Level to set to anything other than 'Debug'
-                FleckLog.Level = LogLevel.Debug;
-                FleckLog.LogAction = (level, message, ex) => {
-                    switch (level) {
-                        case LogLevel.Debug:
-                            _context.Log.DebugFormat(message, ex);
-                            break;
-                        case LogLevel.Error:
-                            _context.Log.ErrorFormat(message, ex);
-                            break;
-                        case LogLevel.Warn:
-                            _context.Log.ErrorFormat(message, ex);
-                            break;
-                        default:
-                            _context.Log.InfoFormat(message, ex);
-                            break;
-                    }
-                };
-                */
-
-                // Build up the connection string needed for WS listen binding
-                // Note: this is different than external connection URL as it needs the transport
-                //     refix, the bind host and the port.
-                string connectionURL = param.isSecure ? param.secureProtocolPrefix : param.defaultProtocolPrefix
-                        + "//" + param.bindHost + ":" + param.port.ToString();
-
-                // For debugging, it is possible to set up a non-encrypted connection
-                if (param.isSecure) {
-                    // logger.Debug("{0} Creating secure server on {1}", _logHeader, connectionURL);
-                    _server = new WebSocketServer(connectionURL) {
-                        Certificate = new X509Certificate2(param.certificate),
-                        EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
+                    FleckLog.Level = LogLevel.Info;
+                    /*  Uncomment this if you want Fleck messages
+                    //  Haven't been able to get FleckLog.Level to set to anything other than 'Debug'
+                    FleckLog.Level = LogLevel.Debug;
+                    FleckLog.LogAction = (level, message, ex) => {
+                        switch (level) {
+                            case LogLevel.Debug:
+                                _context.Log.DebugFormat(message, ex);
+                                break;
+                            case LogLevel.Error:
+                                _context.Log.ErrorFormat(message, ex);
+                                break;
+                            case LogLevel.Warn:
+                                _context.Log.ErrorFormat(message, ex);
+                                break;
+                            default:
+                                _context.Log.InfoFormat(message, ex);
+                                break;
+                        }
                     };
-                }
-                else {
-                    // logger.Debug("{0} Creating insecure server on {1}", _logHeader, connectionURL);
-                    _server = new WebSocketServer(connectionURL);
-                }
+                    */
 
-                // Disable the ACK delay for better responsiveness
-                if (param.disableNaglesAlgorithm) {
-                    _server.ListenerSocket.NoDelay = true;
-                }
+                    // Build up the connection string needed for WS listen binding
+                    // Note: this is different than external connection URL as it needs the transport
+                    //     refix, the bind host and the port.
+                    string connectionURL = param.isSecure ? param.secureProtocolPrefix : param.defaultProtocolPrefix
+                            + "//" + param.bindHost + ":" + param.port.ToString();
 
-                _server.Start(socket => {
-                    // logger.Debug("{0} Received WebSocket connection for port {1}", _logHeader, _params.port);
-                    CancellationTokenSource _connectionCanceller = new CancellationTokenSource();
-                    CancellationToken _connectionCancellerToken = _connectionCanceller.Token;
-                    BTransportWS xport = new BTransportWS(socket, _connectionCancellerToken, logger);
-                    _connectionProcessor(xport, _connectionCanceller);
-                });
+                    // For debugging, it is possible to set up a non-encrypted connection
+                    if (param.isSecure) {
+                        logger.Debug("{0} Creating secure server on {1}", _logHeader, connectionURL);
+                        _server = new WebSocketServer(connectionURL) {
+                            Certificate = new X509Certificate2(param.certificate),
+                            EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
+                        };
+                    }
+                    else {
+                        logger.Debug("{0} Creating insecure server on {1}", _logHeader, connectionURL);
+                        _server = new WebSocketServer(connectionURL);
+                    }
+
+                    // Disable the ACK delay for better responsiveness
+                    if (param.disableNaglesAlgorithm) {
+                        _server.ListenerSocket.NoDelay = true;
+                    }
+
+                    _server.Start(socket => {
+                        // logger.Debug("{0} Received WebSocket connection for port {1}", _logHeader, _params.port);
+                        CancellationTokenSource _connectionCanceller = new CancellationTokenSource();
+                        CancellationToken _connectionCancellerToken = _connectionCanceller.Token;
+                        BTransportWS xport = new BTransportWS(socket, _connectionCancellerToken, logger);
+                        _connectionProcessor(xport, _connectionCanceller);
+                    });
+                }
+                catch (Exception ex) {
+                    logger.Error("{0} Exception starting listener: {1}", _logHeader, ex);
+                }
             }, cancellerSource.Token);
         }
 
