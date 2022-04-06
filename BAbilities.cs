@@ -164,23 +164,14 @@ namespace org.herbal3d.b.protocol {
         public AbilityAssembly() : base() {
         }
     }
-    public class AbilityInstance : AbilityBase {
-        public static string RefItemProp = "refItem"; // either 'SELF' or id of BItem with the geometry
+    // A BItem can be placed in the world. This encodes placement information.
+    public class AbilityPlacement : AbilityBase {
         public static string PosProp = "pos";
         public static string RotProp = "rot";
-        public static string PosRefProp = "posRef";
-        public static string RotRefProp = "rotRef";
+        public static string ForProp = "for";
 
         public const string AbilityName = "Instance";
         public override string Name { get { return AbilityName; } }
-        public string RefItem {
-            get { return P<string>(RefItemProp); }
-            set { SetParam(RefItemProp, value); }
-        }
-        public static string GetRefItem(BMessage pMsg) {
-            pMsg.IProps.TryGetValue(RefItemProp, out var refItem);
-            return refItem as string;
-        }
         public double[] WorldPos {
             get { return P<double[]>(PosProp); }
             set { SetParam(PosProp, value); }
@@ -197,23 +188,11 @@ namespace org.herbal3d.b.protocol {
             pMsg.IProps.TryGetValue(RotProp, out var rot);
             return rot as double[];
         }
-        public CoordSystem PosRef {
-            get { return P<CoordSystem>(PosRefProp); }
-            set { SetParam(PosRefProp, value); }
+        public int ForRef {
+            get { return P<int>(ForProp); }
+            set { SetParam(ForProp, value); }
         }
-        public static CoordSystem GetPosRef(BMessage pMsg) {
-            pMsg.IProps.TryGetValue(PosRefProp, out var posRef);
-            return (CoordSystem)posRef;
-        }
-        public RotationSystem RotRef {
-            get { return P<RotationSystem>(RotRefProp); }
-            set { SetParam(RotRefProp, value); }
-        }
-        public static RotationSystem GetRotRef(BMessage pMsg) {
-            pMsg.IProps.TryGetValue(RotRefProp, out var rotRef);
-            return (RotationSystem)rotRef;
-        }
-        public AbilityInstance() : base() {
+        public AbilityPlacement() : base() {
         }
     }
     // Since these ability definitions mostly deal with how the ability
