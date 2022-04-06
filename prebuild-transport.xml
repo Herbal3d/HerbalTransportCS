@@ -1,4 +1,4 @@
-    <Project frameworkVersion="netstandard2_0"
+    <Project forceFrameworkVersion="netstandard2_0"
                 name="Herbal3d.HerbalTransportCS"
                 path="addon-modules/HerbalTransportCS"
                 type="Library">
