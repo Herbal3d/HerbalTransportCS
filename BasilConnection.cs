@@ -31,7 +31,10 @@ namespace org.herbal3d.transport {
         public TaskCompletionSource<BMessage> taskCompletion;
     }
 
-    // Class of processors called when new messages are received.
+    // Class used to process incoming connections.
+    // Different processors create a subclass of this and over-ride "Process"
+    //     with their processors.
+    // This processor is added to the BasilConnection with "SetOpProcessor".
     public class IncomingMessageProcessor {
         private readonly object _callersContext;
         public IncomingMessageProcessor(object pContext) {
@@ -43,7 +46,6 @@ namespace org.herbal3d.transport {
             BMessage resp = BasilConnection.MakeResponse(pMsg);
             resp.Exception = "Session is not open. AA";
             pProtocol.Send(resp);
-
                 /*
                 switch (pMsg.Op) {
                     case (uint)BMessageOps.CreateItemReq:
@@ -91,6 +93,7 @@ namespace org.herbal3d.transport {
         // When a non-RCP response message is received, this processor is called
         private IncomingMessageProcessor _processOp;
 
+        // Create a BMessage based communication based on a BProtocol stream of messages.
         public BasilConnection(BProtocol pProtocol, BLogger pLogger) {
             _log = pLogger;
             _protocol = pProtocol;
@@ -98,6 +101,8 @@ namespace org.herbal3d.transport {
             if (_log == null) {
                 throw new Exception("BasilConnection.constructor: logger parameter null");
             }
+            // Start with a default processor that returns errors
+            // Someone will later over-ride this by calling "SetOpProcessor"
             _processOp = new IncomingMessageProcessor(this);
         }
 
@@ -124,14 +129,41 @@ namespace org.herbal3d.transport {
             BasilConnection me = pContext as BasilConnection;
             if (me != null) {
                 me._log.Debug("BasilConnection.watchTransportState: newState = {0}", pNewState);
+                if (me.getState() == BConnectionStates.OPEN) {
+                    List<TaskCompletionSource<bool>> waiters;
+                    lock (me._readyWaiters) {
+                        waiters = me._readyWaiters;
+                        me._readyWaiters.Clear();
+                    }
+                    if (waiters != null) {
+                        foreach (var waiter in waiters) {
+                            waiter.SetResult(true);
+                        }
+                        waiters.Clear();
+                        waiters = null;
+                    }
+                }
             }
         }
 
-        public void Send(BMessage pMsg) {
+        // Send the packaged BMessage.
+        // If there is no client Auth specified, it is added.
+        // If optional parameters are specified, they are added to IProps.
+        public void Send(BMessage pMsg, ParamBlock pParams = null) {
             if (pMsg.Auth == null && _outgoingAuth != null) {
                 pMsg.Auth = _outgoingAuth.Token;
             }
+            if (pParams != null) {
+                pParams.CopyTo(pMsg.IProps);
+            }
             _protocol?.Send(pMsg);
+        }
+
+        // Send a response to a received message.
+        // The optional parameters are added to IProps before sending
+        public void SendResponse(BMessage pReceived, ParamBlock pParams = null) {
+            var resp = BasilConnection.MakeResponse(pReceived);
+            Send(resp, pParams);
         }
 
         private Dictionary<BConnectionStates, BTransportConnectionStates> mapConnectionStateToTransportState
@@ -152,10 +184,12 @@ namespace org.herbal3d.transport {
             };
         public BConnectionStates getState() {
             var transportState = _protocol.Transport.ConnectionState;
-            return mapTransportStateToConnectionState[transportState];
+            this._state = mapTransportStateToConnectionState[transportState];
+            return this._state;
         }
 
         private List<TaskCompletionSource<bool>> _readyWaiters = new List<TaskCompletionSource<bool>>();
+        // Return a Task that is satisfied when this connection is Ready
         public Task<bool> WhenReady() {
             TaskCompletionSource<bool> tcs = new TaskCompletionSource<bool>();
             if (getState() == BConnectionStates.OPEN) {
@@ -178,7 +212,7 @@ namespace org.herbal3d.transport {
             return SendAndPromiseResponse(bmsg, this);
         }
 
-        public Task<BMessage> DeleteItem(string pItemId, OSAuthToken pItemAuth) {
+        public Task<BMessage> DeleteItem(string pItemId, OSAuthToken pItemAuth = null) {
             BMessage bmsg = new BMessage() { Op = (uint)BMessageOps.DeleteItemReq };
             if (_outgoingAuth != null) bmsg.Auth = _outgoingAuth.Token;
             bmsg.IId = pItemId;

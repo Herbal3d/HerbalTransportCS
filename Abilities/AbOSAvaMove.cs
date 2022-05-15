@@ -19,9 +19,26 @@ using org.herbal3d.OSAuth;
 namespace org.herbal3d.b.protocol {
 
     public class AbOSAvaMove : AbilityBase {
+        public static string MoveActionProp = "moveAction";
 
         public const string AbilityName = "OSAvatarMovement";
         public override string Name { get { return AbilityName; } }
 
+        public enum OSAvaMoveActions {
+            Stand = 0,
+            WalkForward,
+            WalkBackward,
+            TurnRight,
+            TurnLeft,
+            Fly,
+            Up,
+            Down
+        };
+
+
+        public string MoveAction {
+            get { return P<string>(MoveActionProp); }
+            set { SetParam(MoveActionProp, value); }
+        }
     }
 }

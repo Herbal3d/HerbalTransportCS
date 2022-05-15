@@ -22,13 +22,11 @@ namespace org.herbal3d.b.protocol {
     //  variables show up in the BMesssage properties, this is a fake
     //  ability that encodes the BMessage properties for an OpenSession
     //  request.
-    public class AbOpenSession : AbilityBase {
+    public class OpenSessionResp : ParamBlock {
         public static string ClientAuthProp = "clientAuth";
         public static string ServerVersionProp = "serverVersion";
         public static string ServerAuthProp = "serverAuth";
 
-        public const string AbilityName = "OpenSession";
-        public override string Name { get { return AbilityName; } }
         public string ClientAuth {
             get { return P<string>(ClientAuthProp); }
             set { SetParam(ClientAuthProp, value); }
@@ -62,7 +60,7 @@ namespace org.herbal3d.b.protocol {
             pMsg.IProps.TryGetValue(ServerAuthProp, out var serverAuth);
             return serverAuth as string;
         }
-        public AbOpenSession() : base() {
+        public OpenSessionResp() : base() {
         }
     }
 }
