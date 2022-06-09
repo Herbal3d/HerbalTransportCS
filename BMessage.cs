@@ -14,6 +14,8 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 
+using Newtonsoft.Json;
+
 namespace org.herbal3d.b.protocol {
     public enum BMessageOps {
         UnknownReq = 0x00000,
@@ -81,29 +83,44 @@ namespace org.herbal3d.b.protocol {
             IProps = new Dictionary<string, object>();
         }
         // Header for tracking and response (RCP) linkage
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string SCode;        // unique value to tie a response to a request
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string RCode;        // responding code
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ResponseKey;  // optional key to verify a response
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public uint sId;            // if there are multiple streams in one connection
         public uint pVer = 1;       // protocol version
 
         // Performance/metrics
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ulong QueueTime;     // when message queued
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public ulong SendTime;      // when the message was sent
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public uint TransportClass; // priority class
 
         // The operation
         public uint Op;             // the operation to perform
-        public string IId;          // item referenced by this operation
         public Dictionary<string, object> IProps;       // authorization for the session
-        public string Auth;         // authorization for the referenced item
-        public string IAuth;        // authorization for the referenced item
 
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Addr;         // routing address to destination
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string IId;          // item referenced by this operation
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string Auth;         // authorization for the referenced item
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
+        public string IAuth;        // authorization for the referenced item
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public PositionBlock[] Pos; // If multi-position update, new positions for items
 
         // A response includes exception information.
         // No error is 'exception' being undefined.
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string Exception;
+        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public Dictionary<string, string> ExceptionHints;
 
         public override string ToString() {

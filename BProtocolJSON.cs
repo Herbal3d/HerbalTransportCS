@@ -27,12 +27,6 @@ namespace org.herbal3d.transport {
 
     public class BProtocolJSON : BProtocol {
 
-        // format of the JSON that is sent.
-        JsonSerializerSettings serializeSettings = new JsonSerializerSettings() {
-            // Don't send objects that have a value 'null'
-            NullValueHandling = NullValueHandling.Ignore
-        };
-
         public BProtocolJSON(ParamBlock pParams,
                             BTransport pTransport,
                             BLogger pLogger) : base(pTransport, pLogger) {
@@ -43,13 +37,9 @@ namespace org.herbal3d.transport {
             pTransport.OnStateChange += BProtocolJSON.ProcessOnStateChange;
         }
 
-        public override void Close() {
-            throw new NotImplementedException();
-        }
-
         public override void Send(BMessage pData) {
             // convert the BMessage to JSON buffer
-            string asJSON = JsonConvert.SerializeObject(pData, serializeSettings);
+            string asJSON = JsonConvert.SerializeObject(pData);
             Log.Debug("BProtocolJSON.Send: Sending {0}", asJSON);
             Transport?.Send(Encoding.UTF8.GetBytes(asJSON));
         }

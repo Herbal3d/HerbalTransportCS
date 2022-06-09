@@ -87,6 +87,10 @@ namespace org.herbal3d.transport {
         }
 
         public override void Close() {
+            if (_connection != null) {
+                _connection.Close();
+                _connection = null;
+            }
         }
 
         private void StartInputAndOutputQueueTasks() {

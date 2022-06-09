@@ -54,7 +54,13 @@ namespace org.herbal3d.transport {
             Transport.Start();
         }
 
-        public abstract void Close();
+        public virtual void Close() {
+            if (Transport != null) {
+                Transport.Close();
+                Transport = null;
+            }
+
+        }
 
         public abstract void Send(BMessage pData);
 

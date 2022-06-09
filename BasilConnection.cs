@@ -88,6 +88,9 @@ namespace org.herbal3d.transport {
 
         private BConnectionStates _state;
 
+        // A unique identifier for this particular connection
+        public string ConnectionID { get; private set; }
+
         public readonly Dictionary<string, RPCInfo> _rpcSessions = new Dictionary<string, RPCInfo>();
 
         // When a non-RCP response message is received, this processor is called
@@ -101,6 +104,10 @@ namespace org.herbal3d.transport {
             if (_log == null) {
                 throw new Exception("BasilConnection.constructor: logger parameter null");
             }
+
+            // Make an identifer for thisc onnection
+            ConnectionID = Util.RandomString(8);
+
             // Start with a default processor that returns errors
             // Someone will later over-ride this by calling "SetOpProcessor"
             _processOp = new IncomingMessageProcessor(this);
@@ -108,6 +115,8 @@ namespace org.herbal3d.transport {
 
         // Once an OpenSession happens, the incoming and outgoing auths are created and set.
         public void SetAuthorizations(OSAuthToken pIncoming, OSAuthToken pOutgoing) {
+            _log.Debug("{0}: SetAuthorizations. id={1}, in={2}, out={3}",
+                    "BasilConnection", ConnectionID, pIncoming.Token, pOutgoing.Token);
             _incomingAuth = pIncoming;
             _outgoingAuth = pOutgoing;
         }
@@ -270,26 +279,42 @@ namespace org.herbal3d.transport {
         // @param {BProtocol} pProtocol where the message came from
         private static void ReceivedMsgProcessor(BMessage pMsg, object pContext, BProtocol pProtocol) {
             BasilConnection context = pContext as BasilConnection;
-            if (pMsg.RCode != null) {
-                RPCInfo session;
-                lock (context._rpcSessions) {
-                    session = context._rpcSessions[pMsg.RCode];
+            if (context != null) {
+                if (context._incomingAuth != null) {
+                    context._log.Debug("BasilConnection.RMP: id={0}, in={1}, out={2}",
+                                context.ConnectionID,
+                                context._incomingAuth.Token,
+                                context._outgoingAuth.Token
+                                );
+                    
+                    if (pMsg.Auth == null || context._incomingAuth.Token != pMsg.Auth) {
+                        BMessage resp = BasilConnection.MakeResponse(pMsg);
+                        resp.Exception = "Not authorized";
+                        pProtocol.Send(resp);
+                    }
+                }
+                if (pMsg.RCode != null) {
+                    // Has an RCode so must be a response to a RPC
+                    RPCInfo session;
+                    lock (context._rpcSessions) {
+                        session = context._rpcSessions[pMsg.RCode];
+                        if (session != null) {
+                            context._rpcSessions.Remove(pMsg.RCode);
+                        }
+                    }
                     if (session != null) {
-                        context._rpcSessions.Remove(pMsg.RCode);
+                        try {
+                            session.taskCompletion.SetResult(pMsg);
+                        }
+                        catch (Exception e) {
+                            string errMsg = String.Format("BasilConnection.Processor: exception setting result: {0}", e);
+                            session.taskCompletion.SetException(new Exception(errMsg));
+                        }
                     }
                 }
-                if (session != null) {
-                    try {
-                        session.taskCompletion.SetResult(pMsg);
-                    }
-                    catch (Exception e) {
-                        string errMsg = String.Format("BasilConnection.Processor: exception setting result: {0}", e);
-                        session.taskCompletion.SetException(new Exception(errMsg));
-                    }
+                else {
+                    context._processOp.Process(pMsg, context, pProtocol);
                 }
-            }
-            else {
-                context._processOp.Process(pMsg, context, pProtocol);
             }
         }
 

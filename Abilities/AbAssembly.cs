@@ -17,6 +17,7 @@ using org.herbal3d.cs.CommonUtil;
 using org.herbal3d.OSAuth;
 
 namespace org.herbal3d.b.protocol {
+
     public class AbAssembly : AbilityBase {
         public static string AssetURLProp = "assetUrl";
         public static string AssetLoaderProp = "assetLoader";
@@ -33,6 +34,7 @@ namespace org.herbal3d.b.protocol {
             pMsg.IProps.TryGetValue(AssetURLProp, out var assetURL);
             return assetURL as string;
         }
+        public string[] AssetLoaderValues = new string[] { "gltf" };
         public string AssetLoader {
             get { return P<string>(AssetLoaderProp); }
             set { SetParam(AssetLoaderProp, value); }
