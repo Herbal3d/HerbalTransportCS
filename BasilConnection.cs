@@ -30,6 +30,13 @@ namespace org.herbal3d.transport {
         // Task completion object that is holding the context for the reply.
         public TaskCompletionSource<BMessage> taskCompletion;
     }
+    public enum BConnectionStates {
+        INITIALIZING,
+        OPEN,
+        CLOSING,
+        ERROR,
+        CLOSED
+    };
 
     // Class used to process incoming connections.
     // Different processors create a subclass of this and over-ride "Process"
@@ -71,18 +78,14 @@ namespace org.herbal3d.transport {
         }
     }
 
-    public enum BConnectionStates {
-        INITIALIZING,
-        OPEN,
-        CLOSING,
-        ERROR,
-        CLOSED
-    };
+    // When the connection state changes, a function defined thus is called
+    public delegate void BasilConnectionStateChange(BConnectionStates pNewState, BasilConnection pContext);
 
     public class BasilConnection {
+        private readonly string _logHeader = "[BasilConnection]";
         private readonly BLogger _log;
 
-        private readonly BProtocol _protocol;
+        private BProtocol _protocol;
         private OSAuthToken _incomingAuth;
         private OSAuthToken _outgoingAuth;
 
@@ -95,6 +98,7 @@ namespace org.herbal3d.transport {
 
         // When a non-RCP response message is received, this processor is called
         private IncomingMessageProcessor _processOp;
+        private BasilConnectionStateChange _processStateChange;
 
         // Create a BMessage based communication based on a BProtocol stream of messages.
         public BasilConnection(BProtocol pProtocol, BLogger pLogger) {
@@ -122,8 +126,9 @@ namespace org.herbal3d.transport {
         }
 
         // Caller sets the routines that do the processing
-        public void SetOpProcessor(IncomingMessageProcessor pProcessor) {
+        public void SetOpProcessor(IncomingMessageProcessor pProcessor, BasilConnectionStateChange pStateChange) {
             _processOp = pProcessor;
+            _processStateChange = pStateChange;
         }
 
         public void Start() {
@@ -133,24 +138,51 @@ namespace org.herbal3d.transport {
             return;
         }
 
+        // Called when need to disconnect and stop working
+        public void Stop() {
+            if (_protocol != null) {
+                _protocol.Close();
+                _protocol = null;
+            }
+        }
+
         // When transport state changes, my state changes
         private void watchTransportState(BTransport pXport, BTransportConnectionStates pNewState, object pContext) {
             BasilConnection me = pContext as BasilConnection;
             if (me != null) {
                 me._log.Debug("BasilConnection.watchTransportState: newState = {0}", pNewState);
-                if (me.getState() == BConnectionStates.OPEN) {
-                    List<TaskCompletionSource<bool>> waiters;
-                    lock (me._readyWaiters) {
-                        waiters = me._readyWaiters;
-                        me._readyWaiters.Clear();
-                    }
-                    if (waiters != null) {
-                        foreach (var waiter in waiters) {
-                            waiter.SetResult(true);
+                switch (pNewState) {
+                    case BTransportConnectionStates.OPEN: {
+                        // If connection is OPEN, tell anyone who is waiting for READY
+                        List<TaskCompletionSource<bool>> waiters;
+                        lock (me._readyWaiters) {
+                            waiters = me._readyWaiters;
+                            me._readyWaiters.Clear();
                         }
-                        waiters.Clear();
-                        waiters = null;
+                        if (waiters != null) {
+                            foreach (var waiter in waiters) {
+                                waiter.SetResult(true);
+                            }
+                            waiters.Clear();
+                            waiters = null;
+                        }
+                        break;
                     }
+                    case BTransportConnectionStates.CLOSED: {
+                        break;
+                    }
+                    case BTransportConnectionStates.ERROR: {
+                        break;
+                    }
+                    case BTransportConnectionStates.CLOSING: {
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+                if (me._processStateChange != null) {
+                    me._processStateChange(me.getState(), me);
                 }
             }
         }
@@ -191,7 +223,11 @@ namespace org.herbal3d.transport {
                 { BTransportConnectionStates.ERROR,         BConnectionStates.ERROR },
                 { BTransportConnectionStates.CLOSED,        BConnectionStates.CLOSED },
             };
+        // The BasilConnection state mirrors the state of the transport
         public BConnectionStates getState() {
+            if (_protocol == null) {
+                return BConnectionStates.CLOSED;
+            }
             var transportState = _protocol.Transport.ConnectionState;
             this._state = mapTransportStateToConnectionState[transportState];
             return this._state;
@@ -208,7 +244,13 @@ namespace org.herbal3d.transport {
             else {
                 // if not OPEN, queue the waiting task (in case there are several waiters)
                 lock (_readyWaiters) {
-                    _readyWaiters.Add(tcs);
+                    // Check again inside the lock to prevent race conditions
+                    if (getState() == BConnectionStates.OPEN) {
+                        tcs.SetResult(true);
+                    }
+                    else {
+                        _readyWaiters.Add(tcs);
+                    }
                 }
             }
             return tcs.Task;

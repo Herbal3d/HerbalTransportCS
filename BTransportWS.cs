@@ -115,14 +115,14 @@ namespace org.herbal3d.transport {
         // A WebSocket connection has been made.
         // Initialized the message processors.
         private void Connection_OnOpen() {
+            _log.Debug("{0} Connection_OnOpen: connection state to OPEN", _logHeader);
             base.OnOpened();
-            // _log.Debug("{0} Connection_OnOpen: connection state to OPEN", _logHeader);
         }
 
         // The WebSocket connection is closed. Any application state is out-of-luck
         private void Connection_OnClose() {
+            _log.Debug("{0} Connection_OnClose: connection state to CLOSED", _logHeader);
             base.OnClosed();
-            // _log.Debug("{0} Connection_OnClose: connection state to CLOSED", _logHeader);
         }
 
         private void Connection_OnMessage(string pMsg) {

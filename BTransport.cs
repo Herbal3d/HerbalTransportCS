@@ -52,6 +52,8 @@ namespace org.herbal3d.transport {
     }
 
     public abstract class BTransport {
+        private static readonly string _logHeader = "[BTransport]";
+
         // The transport has a state.
         // Note that changing the state will invoke "OnStateChange".
         private BTransportConnectionStates _connectionState;
@@ -119,6 +121,7 @@ namespace org.herbal3d.transport {
         // The following functions invoke the event listeners.
         // This seems to be the .NET pattern for how you do events.
         protected virtual void OnStateChanged() {
+            _log.Debug("{0} OnStateChanged {1}", _logHeader, _connectionState);
             BTransportOnStateChangeCallback cb = OnStateChange;
             cb?.Invoke(this, _connectionState, _receptionCallbackContext);
         }
