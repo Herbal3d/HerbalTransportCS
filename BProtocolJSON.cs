@@ -29,12 +29,10 @@ namespace org.herbal3d.transport {
 
         public BProtocolJSON(ParamBlock pParams,
                             BTransport pTransport,
-                            BLogger pLogger) : base(pTransport, pLogger) {
+                            BLogger pLogger) : base(pTransport, "JSON", pLogger) {
 
             // set up to receive messages
             pTransport.SetReceiveCallback(ProcessOnMsg, this);
-
-            pTransport.OnStateChange += BProtocolJSON.ProcessOnStateChange;
         }
 
         public override void Send(BMessage pData) {
@@ -46,13 +44,6 @@ namespace org.herbal3d.transport {
 
         // public override void Start() {
         // }
-
-        private static void ProcessOnStateChange(BTransport pTransport, BTransportConnectionStates pState, object pContext) {
-            BProtocolJSON caller = pContext as BProtocolJSON;
-            if (caller != null) {
-                // caller.Log.Debug("BProtocolJSON.ProcessOnStateChange: {0}", pState);
-            }
-        }
 
         /* JSON parsing converter code. Discovered not needed but kept here as an example
         /// <summary>

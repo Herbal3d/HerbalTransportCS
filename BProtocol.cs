@@ -23,6 +23,7 @@ namespace org.herbal3d.transport {
 
     // When a message is received, this is called
     public delegate void BProtocolReceptionCallback(BMessage pMsg, object pContext, BProtocol pProtocol);
+    public delegate void BProtocolStateChangeCallback(BProtocol pProto, BTransportConnectionStates pNewState, object pContext);
 
     /**
      * Wrapper for a protocol handler. This sits in the stack and converts
@@ -31,22 +32,29 @@ namespace org.herbal3d.transport {
     public abstract class BProtocol {
 
         protected BProtocolReceptionCallback _receptionCallback;
+        protected BProtocolStateChangeCallback _stateChangeCallback;
         protected object _receptionCallbackContext;
 
         public BTransport Transport;
+        public string ProtocolType;
         public BLogger Log;
 
-        public BProtocol(BTransport pTransport, BLogger pLogger) {
+        public BProtocol(BTransport pTransport, string pType, BLogger pLogger) {
             Transport = pTransport;
+            ProtocolType = pType;
             Log = pLogger;
+
+            pTransport.OnStateChange += BProtocol.ProcessOnStateChange;
         }
 
         /*
          * Set the function called when a message is received.
          * The "context" is passed so the called function can have the class instance that asked for the message
          */
-        public void SetReceiveCallback(BProtocolReceptionCallback pCallback, object pContext) {
+        public void SetReceiveCallback(BProtocolReceptionCallback pCallback,
+                        BProtocolStateChangeCallback pSCCallback, object pContext) {
             _receptionCallback = pCallback;
+            _stateChangeCallback = pSCCallback;
             _receptionCallbackContext = pContext;
         }
 
@@ -64,5 +72,14 @@ namespace org.herbal3d.transport {
 
         public abstract void Send(BMessage pData);
 
+        private static void ProcessOnStateChange(BTransport pTransport, BTransportConnectionStates pState, object pContext) {
+            BProtocolJSON caller = pContext as BProtocolJSON;
+            if (caller != null) {
+                // caller.Log.Debug("BProtocolJSON.ProcessOnStateChange: {0}", pState);
+                if (caller._stateChangeCallback != null) {
+                    caller._stateChangeCallback(caller, pState, caller._receptionCallbackContext);
+                }
+            }
+        }
     }
 }

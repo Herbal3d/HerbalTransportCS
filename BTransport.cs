@@ -81,9 +81,11 @@ namespace org.herbal3d.transport {
 
         protected readonly BLogger _log;
 
+        public string TransportType = "UNKNOWN";
         public string ConnectionName = "UNKNOWN";
 
-        public BTransport(BLogger pLog) {
+        public BTransport(string pType, BLogger pLog) {
+            TransportType = pType;
             _log = pLog;
             if (_log == null) {
                 throw new Exception("BTransportWS.constructor: logger parameter null");

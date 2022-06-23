@@ -104,7 +104,8 @@ namespace org.herbal3d.transport {
         public BasilConnection(BProtocol pProtocol, BLogger pLogger) {
             _log = pLogger;
             _protocol = pProtocol;
-            _protocol.SetReceiveCallback(BasilConnection.ReceivedMsgProcessor, this);
+            _protocol.SetReceiveCallback(BasilConnection.ReceivedMsgProcessor,
+                    BasilConnection.WatchTransportState, this);
             if (_log == null) {
                 throw new Exception("BasilConnection.constructor: logger parameter null");
             }
@@ -132,8 +133,6 @@ namespace org.herbal3d.transport {
         }
 
         public void Start() {
-            // Watch the transport state and change our state to that
-            _protocol.Transport.OnStateChange += watchTransportState;
             _protocol.Start();
             return;
         }
@@ -147,10 +146,10 @@ namespace org.herbal3d.transport {
         }
 
         // When transport state changes, my state changes
-        private void watchTransportState(BTransport pXport, BTransportConnectionStates pNewState, object pContext) {
+        private static void WatchTransportState(BProtocol pProto, BTransportConnectionStates pNewState, object pContext) {
             BasilConnection me = pContext as BasilConnection;
             if (me != null) {
-                me._log.Debug("BasilConnection.watchTransportState: newState = {0}", pNewState);
+                // me._log.Debug("BasilConnection.watchTransportState: newState = {0}", pNewState);
                 switch (pNewState) {
                     case BTransportConnectionStates.OPEN: {
                         // If connection is OPEN, tell anyone who is waiting for READY

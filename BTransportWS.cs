@@ -61,7 +61,7 @@ namespace org.herbal3d.transport {
          */
         public BTransportWS(IWebSocketConnection pSocket,
                             CancellationToken pCanceller,
-                            BLogger pLogger): base(pLogger) {
+                            BLogger pLogger): base("WS", pLogger) {
 
             _connection = pSocket;
             _overallCancellation = pCanceller;
