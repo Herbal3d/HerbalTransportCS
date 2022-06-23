@@ -122,10 +122,15 @@ namespace org.herbal3d.transport {
 
         // The following functions invoke the event listeners.
         // This seems to be the .NET pattern for how you do events.
+        BTransportConnectionStates _prevState = BTransportConnectionStates.INITIALIZING;
         protected virtual void OnStateChanged() {
-            _log.Debug("{0} OnStateChanged {1}", _logHeader, _connectionState);
-            BTransportOnStateChangeCallback cb = OnStateChange;
-            cb?.Invoke(this, _connectionState, _receptionCallbackContext);
+            if (_connectionState != _prevState) {
+                _log.Debug("{0} OnStateChanged {1}, for type {2} name {3}",
+                        _logHeader, _connectionState, TransportType, ConnectionName);
+                _prevState = _connectionState;
+                BTransportOnStateChangeCallback cb = OnStateChange;
+                cb?.Invoke(this, _connectionState, _receptionCallbackContext);
+            }
         }
         protected virtual void OnOpened() {
             ConnectionState = BTransportConnectionStates.OPEN;
