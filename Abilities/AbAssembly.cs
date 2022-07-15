@@ -61,7 +61,7 @@ namespace org.herbal3d.b.protocol {
             return null;
         }
         public object AssetRepresentation {
-            get { return GetValue(AssetRepresentationProp); }
+            get { return GetObjectValue(AssetRepresentationProp); }
             set { SetParam(AssetRepresentationProp, value); }
         }
         public static object GetAssetRepresentation(BMessage pMsg) {

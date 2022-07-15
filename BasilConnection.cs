@@ -52,7 +52,7 @@ namespace org.herbal3d.transport {
         public virtual void Process(BMessage pMsg, BasilConnection pContext, BProtocol pProtocol) {
             BMessage resp = BasilConnection.MakeResponse(pMsg);
             resp.Exception = "Session is not open. AA";
-            pProtocol.Send(resp);
+            pContext.Send(resp);
                 /*
                 switch (pMsg.Op) {
                     case (uint)BMessageOps.CreateItemReq:
@@ -322,16 +322,17 @@ namespace org.herbal3d.transport {
             BasilConnection context = pContext as BasilConnection;
             if (context != null) {
                 if (context._incomingAuth != null) {
+                    /*
                     context._log.Debug("BasilConnection.RMP: id={0}, in={1}, out={2}",
                                 context.ConnectionID,
                                 context._incomingAuth.Token,
                                 context._outgoingAuth.Token
                                 );
-                    
+                    */ 
                     if (pMsg.Auth == null || context._incomingAuth.Token != pMsg.Auth) {
                         BMessage resp = BasilConnection.MakeResponse(pMsg);
                         resp.Exception = "Not authorized";
-                        pProtocol.Send(resp);
+                        context.Send(resp);
                     }
                 }
                 if (pMsg.RCode != null) {
@@ -354,7 +355,16 @@ namespace org.herbal3d.transport {
                     }
                 }
                 else {
-                    context._processOp.Process(pMsg, context, pProtocol);
+                    try {
+                        context._processOp.Process(pMsg, context, pProtocol);
+                    }
+                    catch (Exception ex) {
+                        BMessage resp = BasilConnection.MakeResponse(pMsg);
+                        string errMsg = String.Format("exception processing: {0}", ex);
+                        context._log.Error("BasilConnection.ReceivedMessageProcessor: " + errMsg);
+                        resp.Exception = errMsg;
+                        context.Send(resp);
+                    }
                 }
             }
         }

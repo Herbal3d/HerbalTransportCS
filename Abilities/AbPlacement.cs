@@ -22,6 +22,8 @@ namespace org.herbal3d.b.protocol {
     public class AbPlacement : AbilityBase {
         public static string PosProp = "pos";
         public static string RotProp = "rot";
+        public static string PosToProp = "posTo";
+        public static string RotToProp = "rotTo";
         public static string ForProp = "for";
 
         public const string AbilityName = "Placement";
@@ -30,6 +32,10 @@ namespace org.herbal3d.b.protocol {
             get { return P<double[]>(PosProp); }
             set { SetParam(PosProp, value); }
         }
+        public double[] ToWorldPos {
+            get { return P<double[]>(PosToProp); }
+            set { SetParam(PosToProp, value); }
+        }
         public static double[] GetWorldPos(BMessage pMsg) {
             pMsg.IProps.TryGetValue(PosProp, out var pos);
             return pos as double[];
@@ -37,6 +43,10 @@ namespace org.herbal3d.b.protocol {
         public double[] WorldRot {
             get { return P<double[]>(RotProp); }
             set { SetParam(RotProp, value); }
+        }
+        public double[] ToWorldRot {
+            get { return P<double[]>(RotToProp); }
+            set { SetParam(RotToProp, value); }
         }
         public static double[] GetWorldRot(BMessage pMsg) {
             pMsg.IProps.TryGetValue(RotProp, out var rot);
