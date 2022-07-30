@@ -30,14 +30,15 @@ namespace org.herbal3d.b.protocol {
         public override string Name { get { return AbilityName; } }
 
         public enum OSAvaUpdateMoveAction {
-            Stand = 0,
-            WalkForward,
-            WalkBackward,
-            TurnRight,
-            TurnLeft,
-            Fly,
-            Up,
-            Down
+            None            = 0,
+            WalkForward     = 0x0001,
+            WalkBackward    = 0x0002,
+            TurnLeft        = 0x0004,
+            TurnRight       = 0x0008,
+            MoveUp          = 0x0010,
+            MoveDown        = 0x0020,
+            Fly             = 0x0040,
+            Stand           = 0x0080,
         };
 
         public uint ControlFlag {
