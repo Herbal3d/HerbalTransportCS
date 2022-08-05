@@ -372,10 +372,7 @@ namespace org.herbal3d.transport {
         // Convert the passed set of parameters into the <string,string> structure that's
         //    send in the BMessage.
         private Dictionary<string, object> CreatePropertyList(ParamBlock pProps) {
-            Dictionary<string, object> ret = new Dictionary<string, object>();
-            foreach (var kvp in pProps.Params) {
-                ret.Add(kvp.Key, kvp.Value);
-            }
+            Dictionary<string, object> ret = new Dictionary<string, object>(pProps.Params);
             return ret;
         }
 
