@@ -39,7 +39,7 @@ namespace org.herbal3d.transport {
         }
 
         public override string ExternalURL(string pExternalHostname) {
-            return isSecure ? secureProtocolPrefix : defaultProtocolPrefix
+            return (isSecure ? secureProtocolPrefix : defaultProtocolPrefix)
                         + "//" + pExternalHostname + ":" + port.ToString();
         }
     }
@@ -187,14 +187,14 @@ namespace org.herbal3d.transport {
                     // Build up the connection string needed for WS listen binding
                     // Note: this is different than external connection URL as it needs the transport
                     //     refix, the bind host and the port.
-                    string connectionURL = param.isSecure ? param.secureProtocolPrefix : param.defaultProtocolPrefix
+                    string connectionURL = (param.isSecure ? param.secureProtocolPrefix : param.defaultProtocolPrefix)
                             + "//" + param.bindHost + ":" + param.port.ToString();
 
                     // For debugging, it is possible to set up a non-encrypted connection
                     if (param.isSecure) {
                         logger.Debug("{0} Creating secure server on {1}", _logHeader, connectionURL);
                         _server = new WebSocketServer(connectionURL) {
-                            Certificate = new X509Certificate2(param.certificate),
+                            Certificate = (X509Certificate2)X509Certificate2.CreateFromCertFile(param.certificate),
                             EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
                         };
                     }
