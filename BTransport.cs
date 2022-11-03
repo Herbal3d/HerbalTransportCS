@@ -101,6 +101,7 @@ namespace org.herbal3d.transport {
          * The "context" is passed so the called function can have the class instance that asked for the message
          */
         public void SetReceiveCallback(BTransportReceptionCallback pCallback, object pContext) {
+            // _log.Debug("{0} SetReceiveCallback. contextT={1}", _logHeader, pContext.GetType().FullName);
             _receptionCallback = pCallback;
             _receptionCallbackContext = pContext;
         }

@@ -33,7 +33,7 @@ namespace org.herbal3d.transport {
         public readonly string secureProtocolPrefix = "wss:";
 
         public BTransportWSParams(): base() {
-            transport = "WS";
+            transport = BTransportWS.ID;
             protocol = "Basil-JSON";
             port = 11440;
         }
@@ -48,6 +48,9 @@ namespace org.herbal3d.transport {
 
         private static readonly string _logHeader = "[BTransportWS]";
 
+        // Named used to identify transport
+        public static string ID = "WS";
+
         private readonly CancellationToken _overallCancellation;
         private WebSocketServer _server;
         private IWebSocketConnection _connection;
@@ -61,7 +64,7 @@ namespace org.herbal3d.transport {
          */
         public BTransportWS(IWebSocketConnection pSocket,
                             CancellationToken pCanceller,
-                            BLogger pLogger): base("WS", pLogger) {
+                            BLogger pLogger): base(BTransportWS.ID, pLogger) {
 
             _connection = pSocket;
             _overallCancellation = pCanceller;
@@ -78,7 +81,7 @@ namespace org.herbal3d.transport {
             if (_overallCancellation == null) {
                 throw new Exception("BTransportWS.constructor: OverallCancellation parameter null");
             }
-            // _log.Debug("{0} Connection created {1}", _logHeader, ConnectionName);
+            // _log.Debug("{0} Connection created {1}", _logHeader, ConnectionName); // DEBUG DEBUG
         }
 
         public override void Start() {
@@ -99,8 +102,18 @@ namespace org.herbal3d.transport {
             _inputQueueTask = Task.Run(() => {
                 while (!_overallCancellation.IsCancellationRequested) {
                     byte[] msg = _receiveQueue.Take();
-                    if (_receptionCallback != null) {
-                        _receptionCallback(hostingTransport, msg, _receptionCallbackContext);
+                    try {
+                        if (_receptionCallback != null) {
+                            // _log.Debug("{0} sending message to processor", _logHeader); // DEBUG DEBUG
+                            // _log.Debug("{0}     xportT={1}, contextT={2}", _logHeader, hostingTransport.TransportType, _receptionCallbackContext.GetType().FullName); // DEBUG DEBUG
+                            _receptionCallback(hostingTransport, msg, _receptionCallbackContext);
+                        }
+                        else {
+                            _log.Debug("{0} message received with no processor", _logHeader);   // DEBUG DEBUG
+                        }
+                    }
+                    catch (Exception ee) {
+                        _log.Debug("{0} inputQueue: Exception: {1}", _logHeader, ee);
                     }
                 }
             }, _overallCancellation);
@@ -115,7 +128,7 @@ namespace org.herbal3d.transport {
         // A WebSocket connection has been made.
         // Initialized the message processors.
         private void Connection_OnOpen() {
-            // _log.Debug("{0} Connection_OnOpen: connection state to OPEN", _logHeader);
+            _log.Debug("{0} Connection_OnOpen: connection state to OPEN", _logHeader);
             base.OnOpened();
         }
 
@@ -127,14 +140,14 @@ namespace org.herbal3d.transport {
 
         private void Connection_OnMessage(string pMsg) {
             if (IsConnected()) {
-                // _log.Debug("{0} Connection_OnMessage: cn={1}", _logHeader, ConnectionName);
+                // _log.Debug("{0} Connection_OnMessage: cn={1}", _logHeader, ConnectionName); // DEBUG DEBUG
                 _receiveQueue.Add(Encoding.ASCII.GetBytes(pMsg));
             }
         }
 
         private void Connection_OnBinary(byte [] pMsg) {
             if (IsConnected()) {
-                // _log.Debug("{0} Connection_OnBinary: cn={1}", _logHeader, ConnectionName);
+                // _log.Debug("{0} Connection_OnBinary: cn={1}", _logHeader, ConnectionName);  // DEBUG DEBUG
                 _receiveQueue.Add(pMsg);
             }
         }

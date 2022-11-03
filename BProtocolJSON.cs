@@ -28,18 +28,20 @@ namespace org.herbal3d.transport {
 
     public class BProtocolJSON : BProtocol {
 
+        public static string ID = "Basil-JSON";
+
         public BProtocolJSON(ParamBlock pParams,
                             BTransport pTransport,
-                            BLogger pLogger) : base(pTransport, "JSON", pLogger) {
+                            BLogger pLogger) : base(pTransport, BProtocolJSON.ID, pLogger) {
 
             // set up to receive messages
-            pTransport.SetReceiveCallback(ProcessOnMsg, this);
+            pTransport.SetReceiveCallback(BProtocolJSON.ProcessOnMsg, this);
         }
 
         public override void Send(BMessage pData) {
             // convert the BMessage to JSON buffer
             string asJSON = JsonConvert.SerializeObject(pData);
-            // Log.Debug("BProtocolJSON.Send: Sending {0}", asJSON);
+            // Log.Debug("BProtocolJSON.Send: Sending {0}", asJSON);   // DEBUG DEBUG
             Transport?.Send(Encoding.UTF8.GetBytes(asJSON));
         }
 
@@ -128,29 +130,35 @@ namespace org.herbal3d.transport {
 
         private static void ProcessOnMsg(BTransport pTransport, byte[] pData, object pContext) {
             BProtocolJSON caller = pContext as BProtocolJSON;
+            if (caller != null) {
 
-            BMessage bmsg;
+                BMessage bmsg;
 
-            try {
-                JsonConverter[] converters = new JsonConverter[] { new IPropsConverter() };
-                BProtocolJSON.DebugLogger = caller.Log; // DEBUG DEBUG
-                string stringData = System.Text.Encoding.UTF8.GetString(pData);
-                bmsg = JsonConvert.DeserializeObject<BMessage>(stringData, converters);
+                try {
+                    JsonConverter[] converters = new JsonConverter[] { new IPropsConverter() };
+                    BProtocolJSON.DebugLogger = caller.Log; // Kludge so IPropsConverter can output debug messages
+                    string stringData = System.Text.Encoding.UTF8.GetString(pData);
+                    bmsg = JsonConvert.DeserializeObject<BMessage>(stringData, converters);
 
-                // caller.Log.Debug("BProtocolJSON.ProcessOnMsg: {0} received bmsg={1}",
-                //     caller.Transport.ConnectionName,
-                //     bmsg.ToString());
-            }
-            catch (Exception ee) {
-                throw new Exception(String.Format("Failure to parse incoming BMessage: {0}", ee.Message));
-            }
+                    // caller.Log.Debug("BProtocolJSON.ProcessOnMsg: {0} received bmsg={1}",   // DEBUG DEBUG
+                    //     caller.Transport.ConnectionName,
+                    //     bmsg.ToString());
+                }
+                catch (Exception ee) {
+                    caller.Log.Debug("BProtocolJSON.ProcessOnMsg: failure to parse incoming message");
+                    throw new Exception(String.Format("Failure to parse incoming BMessage: {0}", ee.Message));
+                }
 
-            // Give the buffer to our caller
-            if (bmsg != null) {
-                caller._receptionCallback?.Invoke(bmsg, caller._receptionCallbackContext, caller);
+                // Give the buffer to our caller
+                if (bmsg != null) {
+                    caller._receptionCallback?.Invoke(bmsg, caller._receptionCallbackContext, caller);
+                }
+                else {
+                    caller.Log.Error("BProtocolJSON.ProcessOnMsg: Received message but not parsed");
+                }
             }
             else {
-                caller.Log.Error("BProtocolJSON.ProcessOnMsg: Received message but not parsed");
+                throw new Exception("BProtocolJSON.ProcessOnMsg: called with context not instance of BProtocolJSON");
             }
         }
     }

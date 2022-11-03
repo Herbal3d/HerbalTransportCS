@@ -113,6 +113,8 @@ namespace org.herbal3d.transport {
             // Make an identifer for thisc onnection
             ConnectionID = Util.RandomString(8);
 
+            _log.Debug("{0} Created BasilConnection. Protocol={1}, id={2}", _logHeader, pProtocol.ProtocolType, ConnectionID);
+
             // Start with a default processor that returns errors
             // Someone will later over-ride this by calling "SetOpProcessor"
             _processOp = new IncomingMessageProcessor(this);
@@ -143,6 +145,16 @@ namespace org.herbal3d.transport {
                 _protocol.Close();
                 _protocol = null;
             }
+        }
+
+        // Return the protocol that is underlying this connection
+        public BProtocol GetProtocol() {
+            return _protocol;
+        }
+
+        // Return the transport that is underlying this connection
+        public BTransport GetTransport() {
+            return _protocol.Transport;
         }
 
         // When transport state changes, my state changes
@@ -376,11 +388,7 @@ namespace org.herbal3d.transport {
             return ret;
         }
 
-        // Source of random numbers used for RPC response codes.
-        // Random so they are unguessable.
-        private readonly Random _randomNumbers = new Random();
-
-        // Send u
+        // Send a RPC message and return a Task that is completed when the response is received
         private Task<BMessage> SendAndPromiseResponse(BMessage pReq, BasilConnection pContext) {
             // _log.Debug("{0} SendAndAwaitResponse", _logHeader);
             // Place structure in message that receiver will send back so we can match response.
