@@ -113,7 +113,7 @@ namespace org.herbal3d.transport {
             // Make an identifer for thisc onnection
             ConnectionID = Util.RandomString(8);
 
-            _log.Debug("{0} Created BasilConnection. Protocol={1}, id={2}", _logHeader, pProtocol.ProtocolType, ConnectionID);
+            // _log.Debug("{0} Created BasilConnection. Protocol={1}, id={2}", _logHeader, pProtocol.ProtocolType, ConnectionID);
 
             // Start with a default processor that returns errors
             // Someone will later over-ride this by calling "SetOpProcessor"
