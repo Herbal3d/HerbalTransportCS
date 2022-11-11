@@ -25,9 +25,11 @@ namespace org.herbal3d.transport {
 
     // Parameters used to listen for WebSocket connections
     public class BTransportWSParams : BTransportParams {
+        // Usually run insecure with an nginx proxy in the front to eliminate all the SSL complexity
         public bool isSecure = false;
         public string bindHost = "0.0.0.0";
         public string certificate = null;
+        public string externalURLTemplate = "ws://{0}:{1}/";
         public bool disableNaglesAlgorithm = false;
         public readonly string defaultProtocolPrefix = "ws:";
         public readonly string secureProtocolPrefix = "wss:";
@@ -39,8 +41,12 @@ namespace org.herbal3d.transport {
         }
 
         public override string ExternalURL(string pExternalHostname) {
-            return (isSecure ? secureProtocolPrefix : defaultProtocolPrefix)
-                        + "//" + pExternalHostname + ":" + port.ToString();
+            // This is the URL the user must connect to.
+            // The usual configuration is to have an nginx proxy in front of the web
+            //     socket to handle the TLS certificate magic.
+            // So the Fleck code below creates a "ws:" connection point but this advertizes
+            //     an external "wss:" nginx URL.
+            return String.Format(externalURLTemplate, pExternalHostname, port);
         }
     }
 
