@@ -32,7 +32,7 @@ namespace org.herbal3d.transport {
 
         public BProtocolJSON(ParamBlock pParams,
                             BTransport pTransport,
-                            BLogger pLogger) : base(pTransport, BProtocolJSON.ID, pLogger) {
+                            BLogger pLogger) : base(pParams, pTransport, BProtocolJSON.ID, pLogger) {
 
             // set up to receive messages
             pTransport.SetReceiveCallback(BProtocolJSON.ProcessOnMsg, this);
@@ -41,7 +41,9 @@ namespace org.herbal3d.transport {
         public override void Send(BMessage pData) {
             // convert the BMessage to JSON buffer
             string asJSON = JsonConvert.SerializeObject(pData);
-            // Log.Debug("BProtocolJSON.Send: Sending {0}", asJSON);   // DEBUG DEBUG
+            if (logMsgSent) {
+                Log.Debug("BProtocolJSON.Send: Sending {0}", asJSON);   // DEBUG DEBUG
+            }
             Transport?.Send(Encoding.UTF8.GetBytes(asJSON));
         }
 
@@ -140,9 +142,11 @@ namespace org.herbal3d.transport {
                     string stringData = System.Text.Encoding.UTF8.GetString(pData);
                     bmsg = JsonConvert.DeserializeObject<BMessage>(stringData, converters);
 
-                    // caller.Log.Debug("BProtocolJSON.ProcessOnMsg: {0} received bmsg={1}",   // DEBUG DEBUG
-                    //     caller.Transport.ConnectionName,
-                    //     bmsg.ToString());
+                    if (caller.logMsgRcvd) {
+                        caller.Log.Debug("BProtocolJSON.ProcessOnMsg: {0} received bmsg={1}",
+                            caller.Transport.ConnectionName,
+                            bmsg.ToString());
+                    }
                 }
                 catch (Exception ee) {
                     caller.Log.Debug("BProtocolJSON.ProcessOnMsg: failure to parse incoming message");

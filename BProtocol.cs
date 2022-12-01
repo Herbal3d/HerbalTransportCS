@@ -35,14 +35,27 @@ namespace org.herbal3d.transport {
         protected BProtocolStateChangeCallback _stateChangeCallback;
         protected object _receptionCallbackContext;
 
+        // Parameters passed to the protocol handler instance at creation
+        public ParamBlock Params { get; set; }
         public BTransport Transport;
         public string ProtocolType;
         public BLogger Log;
 
-        public BProtocol(BTransport pTransport, string pType, BLogger pLogger) {
+        protected bool logMsgSent = false;
+        protected bool logMsgRcvd = false;
+
+
+        public BProtocol(ParamBlock pParams, BTransport pTransport, string pType, BLogger pLogger) {
+            Params = new ParamBlock(pParams, new Dictionary<string, object>() {
+                { "logMsgSent", false },
+                { "logMsgRcvd", false }
+            });
             Transport = pTransport;
             ProtocolType = pType;
             Log = pLogger;
+
+            logMsgSent = Params.P<bool>("logMsgSent");
+            logMsgRcvd = Params.P<bool>("logMsgRcvd");
 
             pTransport.OnStateChange += BProtocol.ProcessOnStateChange;
         }
