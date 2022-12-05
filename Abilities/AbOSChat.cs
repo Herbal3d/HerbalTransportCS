@@ -18,36 +18,75 @@ using org.herbal3d.OSAuth;
 
 namespace org.herbal3d.b.protocol {
 
-    public class AbOSGridChat : AbilityBase {
-        public static string OSChatFromAgentIdProp = "OSChatFromAgentId";
+    public class AbOSChat : AbilityBase {
+        public static string OSChatTypeProp = "OSChatType";
+        public static string OSChatSourceProp = "OSChatSource";
+        public static string OSChatChannelProp = "OSChatChannel";
         public static string OSChatFromAgentNameProp = "OSChatFromAgentName";
+        public static string OSChatFromAgentIdProp = "OSChatFromAgentId";
+        public static string OSChatMessageProp = "OSChatMessage";
+        public static string OSChatPositionProp = "OSChatPosition";
         public static string OSChatToAgentIdProp = "OSChatToAgentId";
+
         public static string OSChatDialogProp = "OSChatDialog";
         public static string OSChatFromGroupProp = "OSChatFromGroup";
-        public static string OSChatMessageProp = "OSChatMessage";
         public static string OSChatImSessionIdProp = "OSChatImSessionId";
         public static string OSChatOfflineProp = "OSChatOffline";
-        public static string OSChatPositionProp = "OSChatPosition";
         public static string OSChatParentEstateIdProp = "OSChatParentEstateId";
         public static string OSChatRegionIdProp = "OSChatRegionId";
         public static string OSChatTimestampProp = "OSChatTimestamp";
         public static string OSChatUnhandledProp = "OSChatUnhandled";
 
+        public static Dictionary<uint, string> OSChatTypeCodeToString = new Dictionary<uint, string>() {
+            { 0, "Whisper" },
+            { 1, "Say" },
+            { 2, "Shout" },
+            { 3, "Say" },
+            { 4, "StartTyping" },
+            { 5, "StopTyping" },
+            { 6, "Debug" },
+            { 7, "Region" },
+            { 8, "Owner" },
+            { 9, "Direct" },    // llRegionSayTo
+            { 0xFF, "Broadcast" }
+        };
+
         public const string AbilityName = "OSGridChat";
         public override string Name { get { return AbilityName; } }
 
-        public string OSChatFromAgentId {
-            get { return P<string>(OSChatFromAgentIdProp); }
-            set { SetParam(OSChatFromAgentIdProp, value); }
+        public string OSChatType {
+            get { return P<string>(OSChatTypeProp); }
+            set { SetParam(OSChatTypeProp, value); }
+        }
+        public string OSChatSource {
+            get { return P<string>(OSChatSourceProp); }
+            set { SetParam(OSChatSourceProp, value); }
+        }
+        public int OSChatChannel {
+            get { return P<int>(OSChatChannelProp); }
+            set { SetParam(OSChatChannelProp, value); }
         }
         public string OSChatFromAgentName {
             get { return P<string>(OSChatFromAgentNameProp); }
             set { SetParam(OSChatFromAgentNameProp, value); }
         }
+        public string OSChatFromAgentId {
+            get { return P<string>(OSChatFromAgentIdProp); }
+            set { SetParam(OSChatFromAgentIdProp, value); }
+        }
+        public string OSChatMessage {
+            get { return P<string>(OSChatMessageProp); }
+            set { SetParam(OSChatMessageProp, value); }
+        }
+        public float[] OSChatPosition {
+            get { return P<float[]>(OSChatPositionProp); }
+            set { SetParam(OSChatPositionProp, value); }
+        }
         public string OSChatToAgentId {
             get { return P<string>(OSChatToAgentIdProp); }
             set { SetParam(OSChatToAgentIdProp, value); }
         }
+
         public byte OSChatDialog {
             get { return P<byte>(OSChatDialogProp); }
             set { SetParam(OSChatDialogProp, value); }
@@ -56,10 +95,6 @@ namespace org.herbal3d.b.protocol {
             get { return P<bool>(OSChatFromGroupProp); }
             set { SetParam(OSChatFromGroupProp, value); }
         }
-        public string OSChatMessage {
-            get { return P<string>(OSChatMessageProp); }
-            set { SetParam(OSChatMessageProp, value); }
-        }
         public string OSChatImSessionId {
             get { return P<string>(OSChatImSessionIdProp); }
             set { SetParam(OSChatImSessionIdProp, value); }
@@ -67,10 +102,6 @@ namespace org.herbal3d.b.protocol {
         public byte OSChatOffline {
             get { return P<byte>(OSChatOfflineProp); }
             set { SetParam(OSChatOfflineProp, value); }
-        }
-        public string OSChatPosition {
-            get { return P<string>(OSChatPositionProp); }
-            set { SetParam(OSChatPositionProp, value); }
         }
         public string OSChatParentEstateId {
             get { return P<string>(OSChatParentEstateIdProp); }
