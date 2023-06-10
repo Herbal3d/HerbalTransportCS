@@ -13,13 +13,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 using org.herbal3d.b.protocol;
 using org.herbal3d.cs.CommonUtil;
-
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace org.herbal3d.transport {
     /**
@@ -40,7 +38,12 @@ namespace org.herbal3d.transport {
 
         public override void Send(BMessage pData) {
             // convert the BMessage to JSON buffer
-            string asJSON = JsonConvert.SerializeObject(pData);
+            var options = new JsonSerializerOptions {
+                WriteIndented = true,   // pretty print
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault,
+                IncludeFields = true    // normally fields are not serialized
+            };
+            string asJSON = JsonSerializer.Serialize(pData, options);
             if (logMsgSent) {
                 Log.Debug("BProtocolJSON.Send: Sending {0}", asJSON);   // DEBUG DEBUG
             }
@@ -49,6 +52,72 @@ namespace org.herbal3d.transport {
 
         // public override void Start() {
         // }
+
+        private class IPropsConverter : JsonConverterFactory {
+            public override bool CanConvert(Type typeToConvert) {
+                return typeToConvert == typeof(Dictionary<string,object>);
+            }
+
+            public override JsonConverter CreateConverter(Type typeToConvert, JsonSerializerOptions options) {
+                return new IPropsConverterReader(typeToConvert, options);
+            }
+        }
+        private class IPropsConverterReader : JsonConverter<Dictionary<string, object>> {
+            public IPropsConverterReader(Type typeToConvert, JsonSerializerOptions options) : base() {
+            }
+            public override Dictionary<string, object> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+                Dictionary<string, object> ret = new Dictionary<string, object>();
+                if (reader.TokenType == JsonTokenType.StartObject) {
+                    while (reader.Read()) {
+                        if (reader.TokenType == JsonTokenType.EndObject) {
+                            break;
+                        }
+                        if (reader.TokenType == JsonTokenType.PropertyName) {
+                            string propName = reader.GetString();
+                            reader.Read();
+                            switch (reader.TokenType) {
+                                case JsonTokenType.String:
+                                    ret.Add(propName, reader.GetString());
+                                    break;
+                                case JsonTokenType.Number:
+                                    ret.Add(propName, reader.GetDouble());
+                                    break;
+                                case JsonTokenType.StartArray:
+                                    List<string> strList = new List<string>();
+                                    List<double> dblList = new List<double>();
+                                    while (reader.Read()) {
+                                        if (reader.TokenType == JsonTokenType.EndArray) {
+                                            break;
+                                        }
+                                        switch (reader.TokenType) {
+                                            case JsonTokenType.String:
+                                                strList.Add(reader.GetString());
+                                                break;
+                                            case JsonTokenType.Number:
+                                                dblList.Add(reader.GetDouble());
+                                                break;
+                                        }
+                                    }
+                                    if (strList.Count > 0) {
+                                        ret.Add(propName, strList.ToArray());
+                                    }
+                                    else if (dblList.Count > 0) {
+                                        ret.Add(propName, dblList.ToArray());
+                                    }
+                                    break;
+                            }
+                        }
+                    }
+
+                }
+
+                return ret;
+            }
+
+            public override void Write(Utf8JsonWriter writer, Dictionary<string, object> value, JsonSerializerOptions options) {
+                throw new NotImplementedException();
+            }
+        }
 
         /// <summary>
         /// The BMessage has an IProps field which is a keyed collection of values.
@@ -60,7 +129,8 @@ namespace org.herbal3d.transport {
         /// Values are PropValues and can be string | number | string[] | number[]
         ///     where 'number' is a 'double'.
         /// </summary>
-        private class IPropsConverter : JsonConverter {
+        /*
+        private class IPropsConverterX : JsonConverter {
             // Return that this can convert "Dictionary<string,object>"
             public override bool CanConvert(Type objectType) {
                 // DebugLogger.Debug("BProtocolJSON.IPropsConverter: CanConvert. type={0}", objectType.ToString());
@@ -127,6 +197,7 @@ namespace org.herbal3d.transport {
                 throw new NotImplementedException();
             }
         }
+        */
 
         static BLogger DebugLogger; // DEBUG DEBUG DEBUG Kludge so IPropsConverter can output debug messages
 
@@ -140,7 +211,11 @@ namespace org.herbal3d.transport {
                     JsonConverter[] converters = new JsonConverter[] { new IPropsConverter() };
                     BProtocolJSON.DebugLogger = caller.Log; // Kludge so IPropsConverter can output debug messages
                     string stringData = System.Text.Encoding.UTF8.GetString(pData);
-                    bmsg = JsonConvert.DeserializeObject<BMessage>(stringData, converters);
+                    var options = new JsonSerializerOptions {
+                        IncludeFields = true,   // normally fields are not serialized
+                        Converters = { new IPropsConverter() }
+                    };
+                    bmsg = JsonSerializer.Deserialize<BMessage>(stringData, options);
 
                     if (caller.logMsgRcvd) {
                         caller.Log.Debug("BProtocolJSON.ProcessOnMsg: {0} received bmsg={1}",

@@ -1,4 +1,4 @@
-    <Project forceFrameworkVersion="netstandard2_0"
+    <Project forceFrameworkVersion="net6_0"
                 name="Herbal3d.HerbalTransportCS"
                 path="addon-modules/HerbalTransportCS"
                 type="Library">
@@ -16,6 +16,5 @@
       <ProjectReference name="Herbal3d.OSAuth" include="../OSAuthModule/OSAuth/Herbal3d.OSAuth.csproj"/>
 
       <PackageReference name="Fleck" version="1.2.0"/>
-      <PackageReference name="Newtonsoft.Json" version="13.0.1"/>
 
     </Project>
