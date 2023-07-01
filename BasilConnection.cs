@@ -122,8 +122,8 @@ namespace org.herbal3d.transport {
 
         // Once an OpenSession happens, the incoming and outgoing auths are created and set.
         public void SetAuthorizations(OSAuthToken pIncoming, OSAuthToken pOutgoing) {
-            _log.Debug("{0}: SetAuthorizations. id={1}, in={2}, out={3}",
-                    "BasilConnection", ConnectionID, pIncoming.Token, pOutgoing.Token);
+            // _log.Debug("{0}: SetAuthorizations. id={1}, in={2}, out={3}",
+            //         "BasilConnection", ConnectionID, pIncoming.Token, pOutgoing.Token);
             _incomingAuth = pIncoming;
             _outgoingAuth = pOutgoing;
         }

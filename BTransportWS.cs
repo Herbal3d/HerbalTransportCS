@@ -40,14 +40,6 @@ namespace org.herbal3d.transport {
             port = 11440;
         }
 
-        public override string ExternalURL(string pExternalHostname) {
-            // This is the URL the user must connect to.
-            // The usual configuration is to have an nginx proxy in front of the web
-            //     socket to handle the TLS certificate magic.
-            // So the Fleck code below creates a "ws:" connection point but this advertizes
-            //     an external "wss:" nginx URL.
-            return String.Format(externalURLTemplate, pExternalHostname, port);
-        }
     }
 
     public class BTransportWS : BTransport {
@@ -162,90 +154,6 @@ namespace org.herbal3d.transport {
             base.OnErrored();
             _log.Error("{0} OnError event on {1}: {2}", _logHeader, ConnectionName, pExcept);
         }
-            
-
-        /*
-        // This starts a connection listener for the passed "ConnectionURL".
-        // For each connection received, a new BTransportWS is created and
-        //    passed to the BTransportConnectionAcceptedProcesssor.
-        public static Task ConnectionListener(
-                            BTransportWSParams param,
-                            BTransportConnectionAcceptedProcessor connectionProcessor,
-                            CancellationTokenSource cancellerSource,
-                            BLogger logger
-                            ) {
-
-            // Do the listening async
-            return Task.Run(() => {
-
-                BTransportParams _params = param;
-                BTransportConnectionAcceptedProcessor _connectionProcessor = connectionProcessor;
-
-                try {
-                    WebSocketServer _server;
-
-                    FleckLog.Level = LogLevel.Info;
-                    /*  Uncomment this if you want Fleck messages
-                    //  Haven't been able to get FleckLog.Level to set to anything other than 'Debug'
-                    FleckLog.Level = LogLevel.Debug;
-                    FleckLog.LogAction = (level, message, ex) => {
-                        switch (level) {
-                            case LogLevel.Debug:
-                                _context.Log.DebugFormat(message, ex);
-                                break;
-                            case LogLevel.Error:
-                                _context.Log.ErrorFormat(message, ex);
-                                break;
-                            case LogLevel.Warn:
-                                _context.Log.ErrorFormat(message, ex);
-                                break;
-                            default:
-                                _context.Log.InfoFormat(message, ex);
-                                break;
-                        }
-                    };
-                    */
-                    /*
-
-                    // Build up the connection string needed for WS listen binding
-                    // Note: this is different than external connection URL as it needs the transport
-                    //     refix, the bind host and the port.
-                    string connectionURL = (param.isSecure ? param.secureProtocolPrefix : param.defaultProtocolPrefix)
-                            + "//" + param.bindHost + ":" + param.port.ToString();
-
-                    // For debugging, it is possible to set up a non-encrypted connection
-                    if (param.isSecure) {
-                        logger.Debug("{0} Creating secure server on {1}", _logHeader, connectionURL);
-                        _server = new WebSocketServer(connectionURL) {
-                            Certificate = (X509Certificate2)X509Certificate2.CreateFromCertFile(param.certificate),
-                            EnabledSslProtocols = System.Security.Authentication.SslProtocols.Tls12
-                        };
-                    }
-                    else {
-                        logger.Debug("{0} Creating insecure server on {1}", _logHeader, connectionURL);
-                        _server = new WebSocketServer(connectionURL);
-                    }
-
-                    // Disable the ACK delay for better responsiveness
-                    if (param.disableNaglesAlgorithm) {
-                        _server.ListenerSocket.NoDelay = true;
-                    }
-
-                    _server.Start(socket => {
-                        // logger.Debug("{0} Received WebSocket connection for port {1}", _logHeader, _params.port);
-                        CancellationTokenSource _connectionCanceller = new CancellationTokenSource();
-                        CancellationToken _connectionCancellerToken = _connectionCanceller.Token;
-                        BTransportWS xport = new BTransportWS(socket, _connectionCancellerToken, logger);
-                        _connectionProcessor(xport, _connectionCanceller);
-                    });
-                }
-                catch (Exception ex) {
-                    logger.Error("{0} Exception starting listener: {1}", _logHeader, ex);
-                }
-            }, cancellerSource.Token);
-        }
-        */
-
     }
 
     // Since we can't create a WebSocket processor until we have the socket, this

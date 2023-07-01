@@ -43,9 +43,8 @@ namespace org.herbal3d.transport {
         public bool preferred = false;
         public string transport = "UNKNOWN";
         public string protocol = "UNKNOWN";
+        public string host = "UNKNOWN";
         public int port = 11440;
-
-        public abstract string ExternalURL(string pExternalHostname);
     }
 
     public abstract class BTransport {
